@@ -33,10 +33,13 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.material3)
             implementation(libs.ktor.client.okhttp) // Android engine
+            implementation(libs.koin.compose)                  // Compose Multiplatform Koin
+            implementation(libs.koin.compose.viewmodel)        // Koin ViewModel (Multiplatform)
         }
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin) // iOS engine
+            implementation(libs.koin.core)    // required for ios specific injection koin
         }
 
         commonMain.dependencies {
@@ -50,6 +53,8 @@ kotlin {
             implementation(libs.ktor.client.websockets) // WebSockets
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.koin.core)                     // Koin DI
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

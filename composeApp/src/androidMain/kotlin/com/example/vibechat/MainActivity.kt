@@ -18,8 +18,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
+fun getDeviceName (): String {
+    return android.os.Build.MODEL
 }

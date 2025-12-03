@@ -47,6 +47,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vibechat.koin.getDeviceInfo
+import com.example.vibechat.ui.viewmodels.ConversationsViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -55,9 +57,9 @@ import kotlin.math.min
 fun HomeScreenV2(
     modifier: Modifier = Modifier,
     onlineCount: Int = 1845,
-    onStartMatching: () -> Unit = {}
 ) {
     var isAnimating by remember { mutableStateOf(false) }
+//    val viewModel : ConversationsViewModel = viewModel()
 
     // Full-screen gradient background
     Box(
@@ -95,7 +97,7 @@ fun HomeScreenV2(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = onlineCount.toString(),
+                    text = getDeviceInfo().getDeviceId(),
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
@@ -108,10 +110,11 @@ fun HomeScreenV2(
                 isAnimating = isAnimating,
                 onClick = {
                     isAnimating = true
-                    onStartMatching()
+//                    viewModel.connectToSocketAndSubscribe(
+//                        userId = "userId"
+//                    )
                 }
             )
-//            BottomPillNav()
         }
     }
 }
