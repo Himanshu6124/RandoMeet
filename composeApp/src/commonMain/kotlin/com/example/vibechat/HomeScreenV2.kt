@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.example.vibechat.koin.getDeviceInfo
 import com.example.vibechat.ui.viewmodels.ConversationsViewModel
 import kotlinx.coroutines.delay
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +60,7 @@ fun HomeScreenV2(
     onlineCount: Int = 1845,
 ) {
     var isAnimating by remember { mutableStateOf(false) }
-//    val viewModel : ConversationsViewModel = viewModel()
+//    val viewModel = koinViewModel<ConversationsViewModel>()
 
     // Full-screen gradient background
     Box(

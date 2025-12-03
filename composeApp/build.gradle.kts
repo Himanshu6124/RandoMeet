@@ -33,8 +33,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.material3)
             implementation(libs.ktor.client.okhttp) // Android engine
-            implementation(libs.koin.compose)                  // Compose Multiplatform Koin
-            implementation(libs.koin.compose.viewmodel)        // Koin ViewModel (Multiplatform)
+            implementation(libs.koin.androidx.compose)
         }
 
         iosMain.dependencies {
@@ -55,6 +54,9 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
 
             implementation(libs.koin.core)                     // Koin DI
+            implementation(libs.koin.compose)                  // Compose Multiplatform Koin
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
