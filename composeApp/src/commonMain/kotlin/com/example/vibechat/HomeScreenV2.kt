@@ -60,7 +60,7 @@ fun HomeScreenV2(
     onlineCount: Int = 1845,
 ) {
     var isAnimating by remember { mutableStateOf(false) }
-//    val viewModel = koinViewModel<ConversationsViewModel>()
+    val viewModel = koinViewModel<ConversationsViewModel>()
 
     // Full-screen gradient background
     Box(
@@ -111,9 +111,9 @@ fun HomeScreenV2(
                 isAnimating = isAnimating,
                 onClick = {
                     isAnimating = true
-//                    viewModel.connectToSocketAndSubscribe(
-//                        userId = "userId"
-//                    )
+                    viewModel.connectToSocketAndSubscribe(
+                        userId = "userId"
+                    )
                 }
             )
         }

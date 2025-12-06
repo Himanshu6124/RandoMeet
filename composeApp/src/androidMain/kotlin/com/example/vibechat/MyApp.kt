@@ -2,6 +2,7 @@ package com.example.vibechat
 
 import android.app.Application
 import com.example.vibechat.koin.androidPlatformModule
+import com.example.vibechat.koin.conversationViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -12,7 +13,8 @@ class MyApp : Application() {
         startKoin {
             androidContext(this@MyApp)  // ⬅️ This provides 'context'
             modules(
-                androidPlatformModule
+                androidPlatformModule,
+                conversationViewModel
             )
         }
     }

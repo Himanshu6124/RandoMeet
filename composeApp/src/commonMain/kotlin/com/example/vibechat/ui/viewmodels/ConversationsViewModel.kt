@@ -82,7 +82,7 @@ class ConversationsViewModel : ViewModel() {
         stompRepository.subscribe(
             topic = "/topic/room/random/$userId"
         )
-        startMatching(userId)
+//        startMatching(userId)
     }
 
     private fun startMatching(userId: String) {
