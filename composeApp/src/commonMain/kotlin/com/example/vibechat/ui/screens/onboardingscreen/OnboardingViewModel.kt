@@ -1,18 +1,32 @@
 package com.example.vibechat.ui.screens.onboardingscreen
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.koin.DeviceInfo
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class OnboardingViewModel(
     private val deviceInfo: DeviceInfo
-) : ViewModel() {
+) : BaseViewModel<OnboardingUIState,OnboardingUIEvent, OnboardingEffect>() {
 
     init {
         isUserOnboarded()
     }
 
+    override val initialState: OnboardingUIState
+        get() = OnboardingUIState()
+
+    override fun handleEvent(event: OnboardingUIEvent) {
+
+    }
+
     fun isUserOnboarded(){
-        val deviceId = deviceInfo.getDeviceId()
-        println("Device ID: $deviceId")
+        viewModelScope.launch {
+            val deviceId = deviceInfo.getDeviceId()
+            delay(3000)
+
+            _effect.emit(value = OnboardingEffect.NavigateToSignupScreen)
+        }
     }
 }
