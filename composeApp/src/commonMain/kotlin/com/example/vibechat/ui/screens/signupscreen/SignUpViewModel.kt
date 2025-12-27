@@ -42,4 +42,8 @@ class SignUpViewModel : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect
             ))
         }
     }
+
+    fun postUser(userId : String){
+        // To DO
+    }
 }

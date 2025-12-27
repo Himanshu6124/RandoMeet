@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,8 +60,8 @@ fun HomeScreenV2(
     modifier: Modifier = Modifier,
     onMatchFound : () -> Unit
 ) {
-    var isAnimating by remember { mutableStateOf(false) }
-    val viewModel = koinViewModel<ConversationsViewModel>()
+    val viewModel = koinViewModel<RandomMatchViewModel>()
+    val uiState = viewModel.uiState.collectAsState().value
 
     // Full-screen gradient background
     Box(
@@ -108,12 +109,9 @@ fun HomeScreenV2(
 
             FrostedStartButton(
                 size = 240.dp,
-                isAnimating = isAnimating,
+                isAnimating = uiState.isLoading,
                 onClick = {
-                    isAnimating = true
-//                    viewModel.connectToSocketAndSubscribe(
-//                        userId = "userId"
-//                    )
+                    viewModel.handleEvent(RandomMatchEvent.OnStartMatchClick)
                 }
             )
         }
