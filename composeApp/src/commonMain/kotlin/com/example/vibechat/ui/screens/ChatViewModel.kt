@@ -1,4 +1,4 @@
-package com.example.vibechat.ui.viewmodels
+package com.example.vibechat.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,21 +6,19 @@ import com.example.vibechat.data.model.ChatCardData
 import com.example.vibechat.data.model.Message
 import com.example.vibechat.data.model.OnlineStatus
 import com.example.vibechat.data.model.TypingStatus
+import com.example.vibechat.data.model.network.KtorClient
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
-import com.example.vibechat.data.model.network.KtorClient.httpClient
-import com.example.vibechat.ui.viewmodels.uiStates.ChatUIState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 class ChatViewModel(
 
 ) : ViewModel() {
-    private val chatRepository: ChatRepo = ChatRepo(httpClient)
+    private val chatRepository: ChatRepo = ChatRepo(KtorClient.httpClient)
     private val stompRepository: SocketRepo = SocketRepo()
     private var typingJob: Job? = null
     private var hasSentTypingStatus = false

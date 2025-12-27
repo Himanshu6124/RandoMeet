@@ -1,10 +1,9 @@
-package com.example.vibechat.ui.viewmodels
+package com.example.vibechat.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.data.model.User
 import com.example.vibechat.data.model.repository.FriendRepo
-import com.example.vibechat.ui.viewmodels.uiStates.FriendsUIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update

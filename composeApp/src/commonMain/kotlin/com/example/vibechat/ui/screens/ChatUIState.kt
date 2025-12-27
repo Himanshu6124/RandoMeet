@@ -1,4 +1,4 @@
-package com.example.vibechat.ui.viewmodels.uiStates
+package com.example.vibechat.ui.screens
 
 import androidx.compose.runtime.Immutable
 import com.example.vibechat.data.model.Message

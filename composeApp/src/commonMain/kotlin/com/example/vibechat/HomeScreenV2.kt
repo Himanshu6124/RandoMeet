@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.koin.getDeviceInfo
-import com.example.vibechat.ui.viewmodels.ConversationsViewModel
+import com.example.vibechat.ui.screens.ConversationsViewModel
 import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.min

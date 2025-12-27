@@ -1,6 +1,6 @@
 package com.example.vibechat.koin
 
-import com.example.vibechat.ui.viewmodels.ConversationsViewModel
+import com.example.vibechat.ui.screens.ConversationsViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

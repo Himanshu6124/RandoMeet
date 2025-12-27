@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
 
             implementation(libs.androidx.datastore.preferences.core) //datastore
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.1")
 
         }
         commonTest.dependencies {
