@@ -14,3 +14,12 @@ data class OnboardingUIState(
     val allPictures :ArrayList<String> = arrayListOf(),
     val filteredPictures :ArrayList<String> = arrayListOf()
 )
+
+
+sealed interface UIEvent {
+    data class OnUserNameChange(val userName: String) : UIEvent
+    data class OnSelectedImageChange(val selectedImage: String) : UIEvent
+    data class OnSelectedGenderChange(val selectedGender: String) : UIEvent
+    object OnNextClick : UIEvent
+    object OnBackClick : UIEvent
+}
