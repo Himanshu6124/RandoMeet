@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.vibechat.HomeScreenV2
+import com.example.vibechat.ui.screens.matchscreen.HomeScreenV2
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingScreen
 import com.example.vibechat.ui.screens.signupscreen.SignUpUI
 
@@ -18,8 +18,8 @@ fun RandomAppNavGraph(){
     ){
         composable(route = Screen.Splash.route) {
             OnboardingScreen(
-                goToMatchScreen = {
-                    navController.navigate(Screen.RandomMatch.route)
+                goToMatchScreen = { userId->
+                    navController.navigate(Screen.RandomMatch.createRoute(userId))
                 },
                 gotoSignUpScreen = {
                     navController.navigate(Screen.SignUp.route)
@@ -30,12 +30,15 @@ fun RandomAppNavGraph(){
         composable(route = Screen.SignUp.route) {
             SignUpUI(
                 onSignUpSuccess = {
-                    navController.navigate(Screen.RandomMatch.route)
+                    navController.navigate(Screen.RandomMatch.createRoute("def"))
                 }
             )
         }
         composable(route = Screen.RandomMatch.route) {
-            HomeScreenV2()
+            HomeScreenV2(
+                onMatchFound = {
+                }
+            )
         }
     }
 }

@@ -27,9 +27,13 @@ sealed interface Screen {
 
     data object RandomMatch : Screen {
         override val route: String
-            get() = "random_match"
+            get() = "random_match/{user_id}"
         override val name: String
             get() = "Random Match"
+
+        fun createRoute(id: String): String {
+            return "random_match/$id"
+        }
     }
 
     data object Status : Screen {

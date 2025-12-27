@@ -24,9 +24,8 @@ class OnboardingViewModel(
     fun isUserOnboarded(){
         viewModelScope.launch {
             val deviceId = deviceInfo.getDeviceId()
-            delay(3000)
-
-            _effect.emit(value = OnboardingEffect.NavigateToSignupScreen)
+            delay(1000)
+            _effect.emit(value = OnboardingEffect.NavigateToRandomMatchScreen(deviceId))
         }
     }
 }

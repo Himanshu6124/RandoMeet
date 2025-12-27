@@ -16,17 +16,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vibechat.composeapp.generated.resources.Res
@@ -45,10 +47,28 @@ import vibechat.composeapp.generated.resources.user_profile
 
 @Composable
 fun SignUpUI(
-    onSignUpSuccess: () -> Unit
+    onSignUpSuccess: (userId : String) -> Unit
 ) {
     val viewModel: SignUpViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
+
+
+    LaunchedEffect(Unit){
+        viewModel.effect.collectLatest {
+            when(it){
+                SignUpSideEffect.NavigateToBack -> {
+
+                }
+                is SignUpSideEffect.NavigateToChat -> {
+                    onSignUpSuccess(it.userId)
+                }
+                is SignUpSideEffect.ShowError -> {
+
+                }
+            }
+        }
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -151,8 +171,8 @@ fun SignUpUI(
 }
 @Composable
 fun GenderSelectionStylish(
-    selectedGender: GENDER,
-    onGenderSelected: (GENDER) -> Unit
+    selectedGender: GENDER = GENDER.BOY,
+    onGenderSelected: (GENDER) -> Unit = {}
 ) {
     Column {
         Text(
@@ -164,24 +184,28 @@ fun GenderSelectionStylish(
         Spacer(Modifier.height(10.dp))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
         ) {
             GENDER.entries.forEach { gender ->
                 Card(
                     modifier = Modifier
+                        .width(100.dp)
+                        .padding(20.dp)
                         .then(
                             if(selectedGender == gender) Modifier.border(
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(14.dp)
+                                shape = RoundedCornerShape(50)
                             ) else Modifier
                         )
+                        .clip(RoundedCornerShape(50))
                         .clickable { onGenderSelected(gender) },
-                    shape = RoundedCornerShape(14.dp),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Text(
-                        text = gender.displayName
+                        modifier = Modifier.padding(10.dp),
+                        text = gender.displayName.lowercase().replaceFirstChar { it.uppercaseChar() }
                     )
                 }
 

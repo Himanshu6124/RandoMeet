@@ -10,7 +10,7 @@ import org.koin.dsl.module
 expect val platformModule : Module
 
 val conversationViewModel = module {
-    viewModel { ConversationsViewModel() }
+    viewModel { ConversationsViewModel(get()) }
 }
 
 val onboardingViewModel = module {

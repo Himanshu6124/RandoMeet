@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.vibechat.ui.screens.onboardingscreen.OnboardingEffect.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -17,7 +18,7 @@ import org.koin.mp.KoinPlatform.getKoin
 
 @Composable
 fun OnboardingScreen(
-    goToMatchScreen: () -> Unit,
+    goToMatchScreen: (userId: String) -> Unit,
     gotoSignUpScreen: () -> Unit
 ) {
     val viewModel: OnboardingViewModel = koinViewModel()
@@ -27,14 +28,12 @@ fun OnboardingScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                OnboardingEffect.NavigateToRandomMatchScreen -> {
-                    goToMatchScreen()
-                }
-                OnboardingEffect.NavigateToSignupScreen ->{
+                NavigateToSignupScreen ->{
                     gotoSignUpScreen()
                 }
-                null -> {
 
+                is NavigateToRandomMatchScreen -> {
+                    goToMatchScreen(it.userId)
                 }
             }
         }

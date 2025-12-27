@@ -13,6 +13,6 @@ data class OnboardingUIState(
 
 sealed interface OnboardingUIEvent
 sealed interface OnboardingEffect {
-    object NavigateToRandomMatchScreen : OnboardingEffect
+    data class NavigateToRandomMatchScreen(val userId : String) : OnboardingEffect
     object NavigateToSignupScreen : OnboardingEffect
 }

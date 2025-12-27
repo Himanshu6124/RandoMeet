@@ -1,5 +1,6 @@
 package com.example.vibechat.ui.screens
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.data.model.ChatCardData
@@ -11,7 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ConversationsViewModel : ViewModel() {
+class ConversationsViewModel(
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private val chatRepository = ChatRepo()
     private val stompRepository = SocketRepo()
@@ -29,6 +32,8 @@ class ConversationsViewModel : ViewModel() {
     private val _conversation = stompRepository.chatCardData
 
     init {
+        val userId = savedStateHandle.get<String>("user_id") ?: ""
+        println("ConversationViewModel initialized with user ID: $userId")
         viewModelScope.launch {
             _conversation.collect { conversation ->
                 _uiState.update {

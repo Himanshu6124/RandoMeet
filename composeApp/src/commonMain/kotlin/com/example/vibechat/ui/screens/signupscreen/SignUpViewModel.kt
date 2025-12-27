@@ -1,7 +1,9 @@
 package com.example.vibechat.ui.screens.signupscreen
 
+import androidx.lifecycle.viewModelScope
 import com.example.vibechat.core.BaseViewModel
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class SignUpViewModel : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect >() {
 
@@ -24,14 +26,20 @@ class SignUpViewModel : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect
                 }
             }
             is SignUpEvent.OnSignUpClick -> {
-                println("$TAG OnSignupClick")
-
+                    handleSignUpClick()
             }
             is SignUpEvent.OnUserNameChange -> {
                 _uiState.update {
                     it.copy(userName = event.userName)
                 }
             }
+        }
+    }
+    fun handleSignUpClick() {
+        viewModelScope.launch {
+            _effect.emit(SignUpSideEffect.NavigateToChat(
+                userId = uiState.value.userName
+            ))
         }
     }
 }

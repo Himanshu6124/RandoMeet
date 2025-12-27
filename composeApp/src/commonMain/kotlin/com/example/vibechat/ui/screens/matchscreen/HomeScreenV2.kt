@@ -1,4 +1,4 @@
-package com.example.vibechat
+package com.example.vibechat.ui.screens.matchscreen
 
 
 import androidx.compose.animation.AnimatedContent
@@ -57,7 +57,7 @@ import kotlin.math.min
 @Composable
 fun HomeScreenV2(
     modifier: Modifier = Modifier,
-    onlineCount: Int = 1845,
+    onMatchFound : () -> Unit
 ) {
     var isAnimating by remember { mutableStateOf(false) }
     val viewModel = koinViewModel<ConversationsViewModel>()
@@ -111,9 +111,9 @@ fun HomeScreenV2(
                 isAnimating = isAnimating,
                 onClick = {
                     isAnimating = true
-                    viewModel.connectToSocketAndSubscribe(
-                        userId = "userId"
-                    )
+//                    viewModel.connectToSocketAndSubscribe(
+//                        userId = "userId"
+//                    )
                 }
             )
         }
