@@ -57,6 +57,9 @@ kotlin {
             implementation(libs.koin.compose)                  // Compose Multiplatform Koin
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
+
+            implementation(libs.androidx.datastore.preferences.core) //datastore
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

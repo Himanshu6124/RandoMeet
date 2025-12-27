@@ -2,7 +2,7 @@ package com.example.vibechat
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.example.vibechat.koin.conversationViewModel
-import com.example.vibechat.koin.iosPlatformModule
+import com.example.vibechat.koin.platformModule
 import org.koin.core.context.startKoin
 
 
@@ -14,4 +14,4 @@ fun MainViewController() = ComposeUIViewController(
     App()
 }
 
-fun initKoin() = startKoin { modules( iosPlatformModule, conversationViewModel) }
+fun initKoin() = startKoin { modules(platformModule, conversationViewModel) }

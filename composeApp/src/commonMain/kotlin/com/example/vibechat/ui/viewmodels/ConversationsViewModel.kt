@@ -17,7 +17,6 @@ class ConversationsViewModel : ViewModel() {
 
     private val chatRepository = ChatRepo()
     private val stompRepository = SocketRepo()
-    private val userDataStore = UserDataStore()
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
 

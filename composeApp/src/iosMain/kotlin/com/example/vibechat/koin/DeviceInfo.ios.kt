@@ -1,12 +1,11 @@
 package com.example.vibechat.koin
 
-import org.koin.dsl.module
-import org.koin.core.context.startKoin
+import platform.UIKit.UIDevice
 
 
 class IOSDeviceInfo : DeviceInfo {
     override fun getDeviceId(): String {
-        return "IOS Device Id"
+        return UIDevice.currentDevice.identifierForVendor?.UUIDString() ?: "Unknown"
     }
 
 }
@@ -15,8 +14,3 @@ actual fun getDeviceInfo(): DeviceInfo {
     return IOSDeviceInfo()
 }
 
-val iosPlatformModule = module {
-    single<DeviceInfo> { IOSDeviceInfo() }
-}
-
-fun initKoin() = startKoin { modules( iosPlatformModule ) }
