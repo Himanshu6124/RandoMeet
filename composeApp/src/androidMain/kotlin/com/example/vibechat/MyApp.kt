@@ -1,9 +1,13 @@
 package com.example.vibechat
 
 import android.app.Application
+import com.example.vibechat.koin.chatRepo
+import com.example.vibechat.koin.chatViewModel
 import com.example.vibechat.koin.conversationViewModel
 import com.example.vibechat.koin.onboardingViewModel
 import com.example.vibechat.koin.platformModule
+import com.example.vibechat.koin.provideHttpClientModule
+import com.example.vibechat.koin.randomMatchViewModel
 import com.example.vibechat.koin.signUpViewModel
 import com.example.vibechat.ui.screens.signupscreen.SignUpViewModel
 import org.koin.android.ext.koin.androidContext
@@ -19,7 +23,11 @@ class MyApp : Application() {
                 platformModule,
                 conversationViewModel,
                 onboardingViewModel,
-                signUpViewModel
+                randomMatchViewModel,
+                chatViewModel,
+                signUpViewModel,
+                provideHttpClientModule,
+                chatRepo
             )
         }
     }

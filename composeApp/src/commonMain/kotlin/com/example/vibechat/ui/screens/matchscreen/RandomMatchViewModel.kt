@@ -2,14 +2,17 @@ package com.example.vibechat.ui.screens.matchscreen
 
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.core.BaseViewModel
+import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
 import com.example.vibechat.koin.DeviceInfo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RandomMatchViewModel(
     private val deviceInfo: DeviceInfo,
-    private val stompRepository: SocketRepo
+//    private val stompRepository: SocketRepo,
+    private val chatRepo: ChatRepo
 ) : BaseViewModel<RandomMatchUIState, RandomMatchEvent, RandomMatchSideEffect>(){
 
     override val initialState: RandomMatchUIState
@@ -24,16 +27,20 @@ class RandomMatchViewModel(
         }
     }
 
+    init {
+        getFakeData()
+    }
+
 
     fun connectToSocketAndSubscribe() {
         viewModelScope.launch {
             val userId = deviceInfo.getDeviceId()
-            stompRepository.connect(
-                userId = userId,
-            )
-            stompRepository.subscribe(
-                topic = "/topic/room/random/$userId"
-            )
+//            stompRepository.connect(
+//                userId = userId,
+//            )
+//            stompRepository.subscribe(
+//                topic = "/topic/room/random/$userId"
+//            )
             startMatching(userId)
         }
 
@@ -45,7 +52,15 @@ class RandomMatchViewModel(
                 isLoading = true
             )
         }
-        stompRepository.sendMessage("/app/chat.random", userId)
+        delay(1000)
+        _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
+//        stompRepository.sendMessage("/app/chat.random", userId)
+    }
+
+    fun getFakeData(){
+        viewModelScope.launch {
+            chatRepo.getData()
+        }
     }
 
 }

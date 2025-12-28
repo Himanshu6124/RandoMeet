@@ -2,6 +2,11 @@ package com.example.vibechat.koin
 
 import android.content.Context
 import android.provider.Settings
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 
@@ -16,3 +21,14 @@ class AndroidDeviceInfo(private val context : Context) : DeviceInfo {
 actual fun getDeviceInfo(): DeviceInfo {
     return AndroidDeviceInfo(KoinPlatform.getKoin().get())
 }
+
+//actual class KtorClientFactory {
+//    actual fun create(): HttpClient =
+//        HttpClient(OkHttp) {
+//            install(ContentNegotiation) {
+//                json(Json {
+//                    ignoreUnknownKeys = true
+//                })
+//            }
+//        }
+//}

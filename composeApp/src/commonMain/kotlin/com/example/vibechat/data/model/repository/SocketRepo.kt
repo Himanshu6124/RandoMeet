@@ -1,9 +1,9 @@
 package com.example.vibechat.data.model.repository
 
 import com.example.vibechat.data.model.ChatCardData
-import com.example.vibechat.data.model.Message
-import com.example.vibechat.data.model.OnlineStatus
-import com.example.vibechat.data.model.TypingStatus
+import com.example.vibechat.ui.screens.chatscreen.components.Message
+import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
+import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocketSession
@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -99,13 +100,13 @@ class SocketRepo(
     }
 
     suspend fun sendMessage(destination: String, message: Any) {
-        val jsonText = when (message) {
-            is Message -> json.encodeToString<Message>(message)
-            is OnlineStatus -> json.encodeToString<OnlineStatus>(message)
-            is TypingStatus -> json.encodeToString<TypingStatus>(message)
-            else -> json.encodeToString(Message.serializer(), message as Message)
-        }
-        session?.send(Frame.Text(jsonText))
+//        val jsonText = when (message) {
+//            is Message -> json.encodeToString<Message>(message)
+//            is OnlineStatus -> json.encodeToString<OnlineStatus>(message)
+//            is TypingStatus -> json.encodeToString<TypingStatus>(message)
+//            else -> json.encodeToString(Message.serializer(), message as Message)
+//        }
+//        session?.send(Frame.Text(jsonText))
     }
 
     fun disconnect() {

@@ -16,7 +16,7 @@ class ConversationsViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val chatRepository = ChatRepo()
+//    private val chatRepository = ChatRepo()
     private val stompRepository = SocketRepo()
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
@@ -47,31 +47,31 @@ class ConversationsViewModel(
     }
 
 
-    fun getConversations(userId: String) {
-        viewModelScope.launch {
-            _uiState.update { state ->
-                state.copy(
-                    isLoading = true
-                )
-            }
-
-            try {
-                val res = chatRepository.getConversations(userId) as ArrayList<ChatCardData>
-                _uiState.update { state ->
-                    state.copy(
-                        conversations = res,
-                        isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false
-                    )
-                }
-            }
-        }
-    }
+//    fun getConversations(userId: String) {
+//        viewModelScope.launch {
+//            _uiState.update { state ->
+//                state.copy(
+//                    isLoading = true
+//                )
+//            }
+//
+//            try {
+//                val res = chatRepository.getConversations(userId) as ArrayList<ChatCardData>
+//                _uiState.update { state ->
+//                    state.copy(
+//                        conversations = res,
+//                        isLoading = false
+//                    )
+//                }
+//            } catch (e: Exception) {
+//                _uiState.update { state ->
+//                    state.copy(
+//                        isLoading = false
+//                    )
+//                }
+//            }
+//        }
+//    }
 
     fun connectToSocketAndSubscribe(userId: String) {
         viewModelScope.launch {

@@ -1,7 +1,7 @@
 package com.example.vibechat.ui.screens
 
 import androidx.compose.runtime.Immutable
-import com.example.vibechat.data.model.Message
+import com.example.vibechat.ui.screens.chatscreen.components.Message
 
 @Immutable
 data class ChatUIState(

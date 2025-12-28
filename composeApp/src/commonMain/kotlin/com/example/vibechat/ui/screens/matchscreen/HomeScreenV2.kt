@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import com.example.vibechat.koin.getDeviceInfo
 import com.example.vibechat.ui.screens.ConversationsViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.min
 
@@ -62,6 +63,16 @@ fun HomeScreenV2(
 ) {
     val viewModel = koinViewModel<RandomMatchViewModel>()
     val uiState = viewModel.uiState.collectAsState().value
+
+    LaunchedEffect(Unit){
+        viewModel.effect.collectLatest{ effect ->
+            when(effect){
+                RandomMatchSideEffect.NavigateToChatScreen -> {
+                    onMatchFound()
+                }
+            }
+        }
+    }
 
     // Full-screen gradient background
     Box(

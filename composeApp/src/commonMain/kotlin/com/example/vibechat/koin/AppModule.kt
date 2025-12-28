@@ -1,8 +1,16 @@
 package com.example.vibechat.koin
 
+import com.example.vibechat.data.model.repository.ChatRepo
+import com.example.vibechat.ui.screens.ChatViewModel
 import com.example.vibechat.ui.screens.ConversationsViewModel
+import com.example.vibechat.ui.screens.matchscreen.RandomMatchViewModel
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingViewModel
 import com.example.vibechat.ui.screens.signupscreen.SignUpViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -18,4 +26,25 @@ val onboardingViewModel = module {
 }
 val signUpViewModel = module {
     viewModel { SignUpViewModel() }
+}
+
+val chatViewModel = module {
+    viewModel { ChatViewModel() }
+}
+val randomMatchViewModel = module {
+    viewModel { RandomMatchViewModel(get(),get()) }
+}
+
+val provideHttpClientModule = module {
+    single {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(json = Json { ignoreUnknownKeys = true }, contentType = ContentType.Any)
+            }
+        }
+    }
+}
+
+val chatRepo = module {
+    single<ChatRepo> { ChatRepo(get()) }
 }

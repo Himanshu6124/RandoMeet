@@ -3,12 +3,12 @@ package com.example.vibechat.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.data.model.ChatCardData
-import com.example.vibechat.data.model.Message
-import com.example.vibechat.data.model.OnlineStatus
-import com.example.vibechat.data.model.TypingStatus
 import com.example.vibechat.data.model.network.KtorClient
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
+import com.example.vibechat.ui.screens.chatscreen.components.Message
+import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
+import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +41,6 @@ class ChatViewModel(
     val isTyping: StateFlow<Boolean> = stompRepository.isTyping
     val chatCardData: StateFlow<ChatCardData> = stompRepository.chatCardData
 
-    /*** UI / Chat state methods ***/
     fun addMessage(message: Message) {
         val current = _uiState.value.messages.toMutableList()
         current.add(message)
