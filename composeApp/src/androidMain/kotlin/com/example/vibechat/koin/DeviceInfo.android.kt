@@ -2,6 +2,9 @@ package com.example.vibechat.koin
 
 import android.content.Context
 import android.provider.Settings
+import android.widget.Toast
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -32,3 +35,13 @@ actual fun getDeviceInfo(): DeviceInfo {
 //            }
 //        }
 //}
+
+class AndroidToastManager(private val context: Context) : ToastManager {
+    override fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+}
+
+actual fun showToast(message: String) {
+    AndroidToastManager(KoinPlatform.getKoin().get()).showToast(message)
+}

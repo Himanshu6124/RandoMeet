@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class RandomMatchViewModel(
     private val deviceInfo: DeviceInfo,
-//    private val stompRepository: SocketRepo,
+    private val stompRepository: SocketRepo,
     private val chatRepo: ChatRepo
 ) : BaseViewModel<RandomMatchUIState, RandomMatchEvent, RandomMatchSideEffect>(){
 

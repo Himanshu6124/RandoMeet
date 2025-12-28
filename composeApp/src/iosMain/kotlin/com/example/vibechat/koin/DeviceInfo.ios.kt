@@ -1,5 +1,6 @@
 package com.example.vibechat.koin
 
+import androidx.compose.runtime.Composable
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -30,3 +31,12 @@ actual fun getDeviceInfo(): DeviceInfo {
 //            }
 //        }
 //}
+
+class IOSToastManager : ToastManager {
+    override fun showToast(message: String) {
+
+    }
+}
+
+actual fun showToast(message: String) {
+}

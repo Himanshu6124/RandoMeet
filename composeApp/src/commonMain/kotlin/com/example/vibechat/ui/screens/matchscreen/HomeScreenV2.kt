@@ -48,7 +48,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vibechat.koin.ToastManager
 import com.example.vibechat.koin.getDeviceInfo
+import com.example.vibechat.koin.showToast
 import com.example.vibechat.ui.screens.ConversationsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -122,6 +124,7 @@ fun HomeScreenV2(
                 size = 240.dp,
                 isAnimating = uiState.isLoading,
                 onClick = {
+                    showToast("Starting Match...")
                     viewModel.handleEvent(RandomMatchEvent.OnStartMatchClick)
                 }
             )

@@ -7,4 +7,5 @@ import org.koin.dsl.module
 actual val platformModule: Module
     get() = module {
         single<DeviceInfo> { AndroidDeviceInfo(get()) }
+        single<ToastManager> { AndroidToastManager(get()) }
     }
