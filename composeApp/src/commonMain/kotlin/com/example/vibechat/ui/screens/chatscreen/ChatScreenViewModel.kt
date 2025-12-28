@@ -1,9 +1,8 @@
-package com.example.vibechat.ui.screens
+package com.example.vibechat.ui.screens.chatscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.ChatCardData
-import com.example.vibechat.data.model.network.KtorClient
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
 import com.example.vibechat.ui.screens.chatscreen.components.Message
@@ -11,40 +10,39 @@ import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ChatViewModel(
+class ChatScreenViewModel(
+    private val chatRepository: ChatRepo,
+    private val socketRepository: SocketRepo
+) : BaseViewModel<ChatUIState, ChatEvent, ChatSideEffect>() {
 
-) : ViewModel() {
-    private val chatRepository: ChatRepo = ChatRepo(KtorClient.httpClient)
-    private val stompRepository: SocketRepo = SocketRepo()
+    override val initialState: ChatUIState = ChatUIState()
+
     private var typingJob: Job? = null
     private var hasSentTypingStatus = false
     private val typingDelayMillis = 1000L
+    val message: StateFlow<Message?> = socketRepository.messages
+    val isOnline: StateFlow<Boolean> = socketRepository.onlineStatus
+    val isTyping: StateFlow<Boolean> = socketRepository.isTyping
+    val chatCardData: StateFlow<ChatCardData> = socketRepository.chatCardData
 
-    private val _uiState = MutableStateFlow(ChatUIState())
-    val uiState: StateFlow<ChatUIState> = _uiState
+    override fun handleEvent(event: ChatEvent) {
+        when (event) {
+            is ChatEvent.SendMessage -> {
 
-    private val _isRequestLoading = MutableStateFlow(false)
-    val isRequestLoading: StateFlow<Boolean> = _isRequestLoading
-
-    private val _requestSuccess = MutableStateFlow<Boolean?>(null)
-    val requestSuccess: StateFlow<Boolean?> = _requestSuccess
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
-
-    val message: StateFlow<Message?> = stompRepository.messages
-    val isOnline: StateFlow<Boolean> = stompRepository.onlineStatus
-    val isTyping: StateFlow<Boolean> = stompRepository.isTyping
-    val chatCardData: StateFlow<ChatCardData> = stompRepository.chatCardData
+            }
+        }
+    }
 
     fun addMessage(message: Message) {
         val current = _uiState.value.messages.toMutableList()
         current.add(message)
-        _uiState.value = _uiState.value.copy(messages = current)
+        _uiState.update {
+            it.copy(messages = current)
+        }
     }
 
     fun getMessages(conversationId: String) {
@@ -52,42 +50,41 @@ class ChatViewModel(
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 val messages = chatRepository.getMessages(conversationId)
-                _uiState.value = _uiState.value.copy(messages = messages, isLoading = false)
+                _uiState.update {
+                    it.copy(messages = messages, isLoading = false)
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false)
-                _error.value = e.message
+                _uiState.update {
+                    it.copy(
+                        exception = e,
+                        isLoading = false
+                    )
+                }
             }
         }
     }
 
-    /*** Friend request ***/
     fun sendFriendRequest(userId: String, friendId: String, action: String = "send") {
         viewModelScope.launch {
-            _isRequestLoading.value = true
             try {
                 chatRepository.sendFriendRequest(userId, friendId, action)
-                _requestSuccess.value = true
             } catch (e: Exception) {
-                _requestSuccess.value = false
-                _error.value = e.message
-            } finally {
-                _isRequestLoading.value = false
+
             }
         }
     }
 
-    /*** Socket methods ***/
     fun connectToSocket(friendUserId: String, conversationId: String, senderId: String) {
         viewModelScope.launch {
-            stompRepository.connect(userId = senderId)
-            stompRepository.subscribe(topic = "/topic/room/$friendUserId-$conversationId")
+            socketRepository.connect(userId = senderId)
+            socketRepository.subscribe(topic = "/topic/room/$friendUserId-$conversationId")
         }
     }
 
     fun sendMessage(message: Message, isRandom: Boolean) {
         viewModelScope.launch {
             val destination = if (isRandom) "/app/chat.random.send" else "/app/chat.send"
-            stompRepository.sendMessage(destination, message)
+            socketRepository.sendMessage(destination, message)
         }
     }
 
@@ -95,25 +92,7 @@ class ChatViewModel(
         viewModelScope.launch {
             val onlineStatus =
                 OnlineStatus(senderId = senderId, conversationId = conversationId, online = true)
-            stompRepository.sendMessage("/app/chat.online", onlineStatus)
-        }
-    }
-
-    private fun sendTypingStatus(senderId: String, conversationId: String, isTyping: Boolean) {
-        viewModelScope.launch {
-            val typingStatus = TypingStatus(
-                senderId = senderId,
-                conversationId = conversationId,
-                typing = isTyping
-            )
-            stompRepository.sendMessage("/app/chat.typing", typingStatus)
-        }
-    }
-
-    fun getUserStatus(friendId: String, conversationId: String) {
-        viewModelScope.launch {
-            val status = OnlineStatus(senderId = friendId, conversationId = conversationId)
-            stompRepository.sendMessage("/app/chat.user.status", status)
+            socketRepository.sendMessage("/app/chat.online", onlineStatus)
         }
     }
 
@@ -134,9 +113,19 @@ class ChatViewModel(
         }
     }
 
-    /*** Cleanup ***/
+    private fun sendTypingStatus(senderId: String, conversationId: String, isTyping: Boolean) {
+        viewModelScope.launch {
+            val typingStatus = TypingStatus(
+                senderId = senderId,
+                conversationId = conversationId,
+                typing = isTyping
+            )
+            socketRepository.sendMessage("/app/chat.typing", typingStatus)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
-        stompRepository.disconnect()
+        socketRepository.disconnect()
     }
 }

@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
 import com.example.vibechat.ui.commoncomposables.TextComposable
-import com.example.vibechat.ui.screens.ChatViewModel
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
 import com.example.vibechat.ui.screens.matchscreen.ChatCardData
@@ -48,9 +47,9 @@ fun ChatScreen(
     chat : ChatCardData?,
     navigateBack : ()-> Unit,
 ) {
-    val viewModel :ChatViewModel = koinViewModel()
+    val viewModel : ChatScreenViewModel = koinViewModel()
     var inputText by remember { mutableStateOf("") }
-    val messages = viewModel.uiState.collectAsState().value.messages
+//    val messages = viewModel.uiState.collectAsState().value.messages
     val isOnline = viewModel.isOnline.collectAsState()
     val isTyping = viewModel.isTyping.collectAsState()
     val listState = rememberLazyListState()
@@ -60,12 +59,12 @@ fun ChatScreen(
     fun addMessage(newMessage: Message) {
         viewModel.addMessage(newMessage)
         inputText = ""
-        scope.launch {
-            val index = messages.size - 1
-            if (index != -1) {
-                listState.animateScrollToItem(messages.size - 1)
-            }
-        }
+//        scope.launch {
+//            val index = messages.size - 1
+//            if (index != -1) {
+//                listState.animateScrollToItem(messages.size - 1)
+//            }
+//        }
     }
 
     LaunchedEffect(message) {
@@ -120,11 +119,11 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f),
                 state = listState
             ) {
-                items(messages) { message ->
-                    MessageCard(userId, message) {
-                        deleteMessage(it)
-                    }
-                }
+//                items(messages) { message ->
+//                    MessageCard(userId, message) {
+//                        deleteMessage(it)
+//                    }
+//                }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (isTyping.value) {

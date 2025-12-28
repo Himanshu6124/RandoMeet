@@ -1,8 +1,9 @@
 package com.example.vibechat.koin
 
 import com.example.vibechat.data.model.repository.ChatRepo
-import com.example.vibechat.ui.screens.ChatViewModel
+import com.example.vibechat.data.model.repository.SocketRepo
 import com.example.vibechat.ui.screens.ConversationsViewModel
+import com.example.vibechat.ui.screens.chatscreen.ChatScreenViewModel
 import com.example.vibechat.ui.screens.matchscreen.RandomMatchViewModel
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingViewModel
 import com.example.vibechat.ui.screens.signupscreen.SignUpViewModel
@@ -29,7 +30,7 @@ val signUpViewModel = module {
 }
 
 val chatViewModel = module {
-    viewModel { ChatViewModel() }
+    viewModel { ChatScreenViewModel(get(),get()) }
 }
 val randomMatchViewModel = module {
     viewModel { RandomMatchViewModel(get(),get()) }
@@ -47,4 +48,7 @@ val provideHttpClientModule = module {
 
 val chatRepo = module {
     single<ChatRepo> { ChatRepo(get()) }
+}
+val socketRepo = module {
+    single<SocketRepo> { SocketRepo(get()) }
 }

@@ -9,6 +9,7 @@ import com.example.vibechat.koin.platformModule
 import com.example.vibechat.koin.provideHttpClientModule
 import com.example.vibechat.koin.randomMatchViewModel
 import com.example.vibechat.koin.signUpViewModel
+import com.example.vibechat.koin.socketRepo
 import com.example.vibechat.ui.screens.signupscreen.SignUpViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -27,7 +28,8 @@ class MyApp : Application() {
                 chatViewModel,
                 signUpViewModel,
                 provideHttpClientModule,
-                chatRepo
+                chatRepo,
+                socketRepo
             )
         }
     }
