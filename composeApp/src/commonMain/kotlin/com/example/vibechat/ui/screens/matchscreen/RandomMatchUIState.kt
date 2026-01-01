@@ -13,16 +13,16 @@ data class RandomMatchUIState(
 
 @Serializable
 data class ChatCardData(
-    val conversationId : String = String.EMPTY,
+    val conversationId: String = String.EMPTY,
     val friendUserName: String = String.EMPTY,
     val friendUserId: String = String.EMPTY,
-    val isTyping : Boolean= false,
+    val isTyping: Boolean = false,
     val photoUrl: String = String.EMPTY,
     val lastMessage: String? = String.EMPTY,
-    val isByYou : Boolean = false,
-    val messageStatus : MessageStatus? = MessageStatus.SENT,
+    val isByYou: Boolean = false,
+    val messageStatus: MessageStatus? = MessageStatus.SENT,
     val lastMessageTime: String? = String.EMPTY,
-    val messageType  :String? = String.EMPTY
+    val messageType: String? = String.EMPTY
 )
 
 enum class MessageStatus(val status: String) {
@@ -32,6 +32,7 @@ enum class MessageStatus(val status: String) {
 sealed interface RandomMatchEvent {
     data object OnStartMatchClick : RandomMatchEvent
 }
+
 sealed interface RandomMatchSideEffect {
-    data object NavigateToChatScreen : RandomMatchSideEffect
+    data class NavigateToChatScreen(val matchedConversation: ChatCardData) : RandomMatchSideEffect
 }
