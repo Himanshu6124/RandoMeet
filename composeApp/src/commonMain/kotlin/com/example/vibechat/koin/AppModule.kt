@@ -1,7 +1,9 @@
 package com.example.vibechat.koin
 
 import com.example.vibechat.data.model.repository.ChatRepo
-import com.example.vibechat.data.model.repository.SocketRepo
+import com.example.vibechat.data.model.repository.UserRepositoryImpl
+import com.example.vibechat.domain.intefaces.UserRepository
+import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.ConversationsViewModel
 import com.example.vibechat.ui.screens.chatscreen.ChatScreenViewModel
 import com.example.vibechat.ui.screens.matchscreen.RandomMatchViewModel
@@ -18,24 +20,13 @@ import org.koin.dsl.module
 
 expect val platformModule : Module
 
-val conversationViewModel = module {
+val viewmodelModule = module {
     viewModel { ConversationsViewModel(get()) }
-}
-
-val onboardingViewModel = module {
-    viewModel { OnboardingViewModel(get()) }
-}
-val signUpViewModel = module {
-    viewModel { SignUpViewModel() }
-}
-
-val chatViewModel = module {
+    viewModel { OnboardingViewModel(get(),get()) }
+    viewModel { SignUpViewModel(get(),get()) }
     viewModel { ChatScreenViewModel(get(),get()) }
+    viewModel { RandomMatchViewModel(get(),get() ) }
 }
-val randomMatchViewModel = module {
-    viewModel { RandomMatchViewModel(get(),get()) }
-}
-
 val provideHttpClientModule = module {
     single {
         HttpClient {
@@ -46,9 +37,8 @@ val provideHttpClientModule = module {
     }
 }
 
-val chatRepo = module {
+val repositoryModule = module {
     single<ChatRepo> { ChatRepo(get()) }
-}
-val socketRepo = module {
-    single<SocketRepo> { SocketRepo(get()) }
+    single <UserRepository>{ UserRepositoryImpl(get()) }
+    single<SocketRepository> { SocketRepository() }
 }

@@ -2,22 +2,32 @@ package com.example.vibechat.ui.screens.signupscreen
 
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.core.BaseViewModel
+import com.example.vibechat.data.model.User
+import com.example.vibechat.domain.intefaces.UserRepository
+import com.example.vibechat.koin.DeviceInfo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignUpViewModel : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect >() {
+class SignUpViewModel(
+    private val userRepository: UserRepository,
+    private val deviceInfo: DeviceInfo
+) : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect >() {
 
     override val initialState: SignUpUIState
         get() = SignUpUIState()
 
+    init {
+        getProfilePictures()
+    }
 
     override fun handleEvent(event: SignUpEvent) {
         when(event) {
-
             is SignUpEvent.OnSelectedGenderChange -> {
-                println("$TAG OnSelectedGenderChange ${event.selectedGender}")
                 _uiState.update {
-                    it.copy(selectedGender = event.selectedGender)
+                    it.copy(
+                        selectedGender = event.selectedGender,
+                        filteredPictures = _uiState.value.allPictures.filter { pic-> pic.contains(event.selectedGender.displayName,true)  } as ArrayList
+                    )
                 }
             }
             is SignUpEvent.OnSelectedImageChange -> {
@@ -37,13 +47,28 @@ class SignUpViewModel : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect
     }
     fun handleSignUpClick() {
         viewModelScope.launch {
-            _effect.emit(SignUpSideEffect.NavigateToChat(
-                userId = uiState.value.userName
-            ))
+            val res = userRepository.saveUser(
+                User(
+                    deviceId = deviceInfo.getDeviceId(),
+                    name = uiState.value.userName,
+                    gender = uiState.value.selectedGender.displayName,
+                )
+            )
+            res?.let {
+                _effect.emit(SignUpSideEffect.NavigateToMatchScreen)
+            }
         }
     }
 
-    fun postUser(userId : String){
-        // To DO
+    fun getProfilePictures() {
+        viewModelScope.launch {
+            val pics = userRepository.getProfilePictures()
+            _uiState.update {
+                it.copy(
+                    allPictures = pics,
+                    filteredPictures = pics.filter {pic-> pic.contains(_uiState.value.selectedGender.displayName,true)  } as ArrayList
+                )
+            }
+        }
     }
 }

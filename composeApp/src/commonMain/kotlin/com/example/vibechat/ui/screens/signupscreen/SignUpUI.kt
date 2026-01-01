@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vibechat.ui.commoncomposables.LoadNetworkImage
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -47,7 +48,7 @@ import vibechat.composeapp.generated.resources.user_profile
 
 @Composable
 fun SignUpUI(
-    onSignUpSuccess: (userId : String) -> Unit
+    onSignUpSuccess: () -> Unit
 ) {
     val viewModel: SignUpViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -59,8 +60,8 @@ fun SignUpUI(
                 SignUpSideEffect.NavigateToBack -> {
 
                 }
-                is SignUpSideEffect.NavigateToChat -> {
-                    onSignUpSuccess(it.userId)
+                is SignUpSideEffect.NavigateToMatchScreen -> {
+                    onSignUpSuccess()
                 }
                 is SignUpSideEffect.ShowError -> {
 
@@ -133,6 +134,7 @@ fun SignUpUI(
                     )
 
                     ProfilePicturesWidgetStylish(
+                        allImages = uiState.filteredPictures,
                         selectedImage = uiState.selectedImage,
                         onImageSelected = {viewModel.handleEvent(SignUpEvent.OnSelectedImageChange(it))}
                     )
@@ -142,7 +144,7 @@ fun SignUpUI(
                             .fillMaxWidth()
                             .height(54.dp),
                         shape = RoundedCornerShape(30.dp),
-                        enabled = uiState.userName.isNotEmpty(),
+                        enabled = uiState.userName.isNotEmpty() && uiState.selectedImage.isNotEmpty(),
                         onClick = {
                             viewModel.handleEvent(SignUpEvent.OnSignUpClick)
                         }
@@ -216,6 +218,7 @@ fun GenderSelectionStylish(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfilePicturesWidgetStylish(
+    allImages: List<String> ,
     selectedImage: String,
     onImageSelected: (String) -> Unit
 ) {
@@ -232,8 +235,8 @@ fun ProfilePicturesWidgetStylish(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            repeat(6) { index ->
-                val isSelected = selectedImage == index.toString()
+            allImages.forEach{ item ->
+                val isSelected = selectedImage == item
 
                 Box(
                     modifier = Modifier
@@ -247,15 +250,13 @@ fun ProfilePicturesWidgetStylish(
                             shape = CircleShape
                         )
                         .clickable {
-                            onImageSelected(index.toString())
+                            onImageSelected(item)
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(Res.drawable.user_profile),
-                        contentDescription = null,
+                    LoadNetworkImage(
+                        url = item,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
                     )
                 }
             }

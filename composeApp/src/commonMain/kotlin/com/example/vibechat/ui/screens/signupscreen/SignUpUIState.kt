@@ -29,7 +29,7 @@ sealed interface SignUpEvent {
 }
 
 sealed interface SignUpSideEffect {
-    data class NavigateToChat(val userId: String) : SignUpSideEffect
+    data object NavigateToMatchScreen : SignUpSideEffect
     data class ShowError(val error: Exception) : SignUpSideEffect
     data object NavigateToBack : SignUpSideEffect
 }

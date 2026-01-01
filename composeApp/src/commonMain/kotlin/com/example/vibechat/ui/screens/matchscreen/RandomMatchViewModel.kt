@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class RandomMatchViewModel(
     private val deviceInfo: DeviceInfo,
-    private val stompRepository: SocketRepo,
+//    private val stompRepository: SocketRepo,
     private val chatRepo: ChatRepo
 ) : BaseViewModel<RandomMatchUIState, RandomMatchEvent, RandomMatchSideEffect>(){
 
@@ -26,11 +26,6 @@ class RandomMatchViewModel(
             }
         }
     }
-
-    init {
-        getFakeData()
-    }
-
 
     fun connectToSocketAndSubscribe() {
         viewModelScope.launch {
@@ -52,15 +47,8 @@ class RandomMatchViewModel(
                 isLoading = true
             )
         }
-        delay(1000)
-        _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
+//        delay(1000)
+//        _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
 //        stompRepository.sendMessage("/app/chat.random", userId)
     }
-
-    fun getFakeData(){
-        viewModelScope.launch {
-            chatRepo.getData()
-        }
-    }
-
 }

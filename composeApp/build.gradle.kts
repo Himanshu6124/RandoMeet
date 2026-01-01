@@ -34,6 +34,14 @@ kotlin {
             implementation(libs.androidx.material3)
             implementation(libs.ktor.client.okhttp) // Android engine
             implementation(libs.koin.androidx.compose)
+            implementation (libs.stompprotocolandroid)
+            implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+            implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+
+            implementation(libs.gson)
+            implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+            implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+
         }
 
         iosMain.dependencies {
@@ -59,7 +67,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
 
             implementation(libs.androidx.datastore.preferences.core) //datastore
-            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.1")
+            implementation(libs.navigation.compose)
+//            implementation(libs.coil.compose)
+//            implementation(coil.network.ktor)
+
+
 
         }
         commonTest.dependencies {

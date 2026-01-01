@@ -20,7 +20,7 @@ fun RandomAppNavGraph(){
         composable(route = Screen.Splash.route) {
             OnboardingScreen(
                 goToMatchScreen = { userId->
-                    navController.navigate(Screen.RandomMatch.createRoute(userId))
+                    navController.navigate(Screen.RandomMatch.route)
                 },
                 gotoSignUpScreen = {
                     navController.navigate(Screen.SignUp.route)
@@ -31,7 +31,7 @@ fun RandomAppNavGraph(){
         composable(route = Screen.SignUp.route) {
             SignUpUI(
                 onSignUpSuccess = {
-                    navController.navigate(Screen.RandomMatch.createRoute(it))
+                    navController.navigate(Screen.RandomMatch.route)
                 }
             )
         }

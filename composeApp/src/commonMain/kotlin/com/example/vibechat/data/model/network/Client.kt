@@ -10,6 +10,6 @@ object KtorClient {
             json()
         }
     }
-    const val BASE_URL = "https://your.api.com"
+    const val BASE_URL = "http://10.0.2.2:8080"
 }
 

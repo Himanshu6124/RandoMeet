@@ -17,25 +17,11 @@ class ChatRepo(
     private val client: HttpClient
 ) {
 
-    suspend fun saveUser(user: User): User {
-        return client.post("$BASE_URL/users") {
-            contentType(ContentType.Application.Json)
-            setBody(user)
-        }.body()
-    }
-
-    suspend fun getUser(userId: String): User =
-        client.get("$BASE_URL/users/$userId").body()
-
-    suspend fun getProfilePictures(): List<String> =
-        client.get("$BASE_URL/users/profile-pictures").body()
-
     suspend fun getConversations(userId: String): List<ChatCardData> =
         client.get("$BASE_URL/conversations/user/$userId").body()
 
     suspend fun getMessages(conversationId: String): List<Message> =
         client.get("$BASE_URL/messages/conversation/$conversationId").body()
-
 
     suspend fun sendFriendRequest(
         userId: String,
