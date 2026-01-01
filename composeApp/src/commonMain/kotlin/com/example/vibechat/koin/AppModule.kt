@@ -25,7 +25,7 @@ val viewmodelModule = module {
     viewModel { OnboardingViewModel(get(),get()) }
     viewModel { SignUpViewModel(get(),get()) }
     viewModel { ChatScreenViewModel(get(),get()) }
-    viewModel { RandomMatchViewModel(get(),get() ) }
+    viewModel { RandomMatchViewModel(get(),get(),get() ) }
 }
 val provideHttpClientModule = module {
     single {

@@ -70,6 +70,7 @@ fun HomeScreenV2(
         viewModel.effect.collectLatest{ effect ->
             when(effect){
                 RandomMatchSideEffect.NavigateToChatScreen -> {
+                    println("effect navigate to chat screen")
                     onMatchFound()
                 }
             }
@@ -104,20 +105,13 @@ fun HomeScreenV2(
                 modifier = Modifier.padding(top = 12.dp)
             ) {
                 Text(
-                    text = "User Online",
+                    text = "User Online : 1464",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
                         color = Color.White.copy(alpha = 0.9f)
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = getDeviceInfo().getDeviceId(),
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
-                    )
-                )
             }
 
             FrostedStartButton(

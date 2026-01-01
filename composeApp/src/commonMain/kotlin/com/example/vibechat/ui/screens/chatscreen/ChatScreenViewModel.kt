@@ -2,12 +2,12 @@ package com.example.vibechat.ui.screens.chatscreen
 
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.core.BaseViewModel
-import com.example.vibechat.data.model.ChatCardData
 import com.example.vibechat.data.model.repository.ChatRepo
-import com.example.vibechat.data.model.repository.SocketRepo
+import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
+import com.example.vibechat.ui.screens.matchscreen.ChatCardData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class ChatScreenViewModel(
     private val chatRepository: ChatRepo,
-    private val socketRepository: SocketRepo
+    private val socketRepository: SocketRepository
 ) : BaseViewModel<ChatUIState, ChatEvent, ChatSideEffect>() {
 
     override val initialState: ChatUIState = ChatUIState()

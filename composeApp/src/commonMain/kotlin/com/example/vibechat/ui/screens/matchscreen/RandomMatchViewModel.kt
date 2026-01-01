@@ -5,18 +5,35 @@ import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
 import com.example.vibechat.koin.DeviceInfo
+import com.example.vibechat.socket.SocketRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RandomMatchViewModel(
     private val deviceInfo: DeviceInfo,
-//    private val stompRepository: SocketRepo,
+    private val stompRepository: SocketRepository,
     private val chatRepo: ChatRepo
 ) : BaseViewModel<RandomMatchUIState, RandomMatchEvent, RandomMatchSideEffect>(){
 
     override val initialState: RandomMatchUIState
         get() = RandomMatchUIState()
+    private val _conversation = stompRepository.chatCardData
+
+    init {
+        viewModelScope.launch {
+            _conversation.collect { conversation->
+                println("$TAG Conversation data is $conversation")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        matchingConversation = conversation
+                    )
+                }
+                _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
+            }
+        }
+    }
 
     override fun handleEvent(event: RandomMatchEvent) {
 
@@ -30,25 +47,28 @@ class RandomMatchViewModel(
     fun connectToSocketAndSubscribe() {
         viewModelScope.launch {
             val userId = deviceInfo.getDeviceId()
-//            stompRepository.connect(
-//                userId = userId,
-//            )
-//            stompRepository.subscribe(
-//                topic = "/topic/room/random/$userId"
-//            )
+            stompRepository.connect(
+                userId = userId,
+            )
+            stompRepository.subscribe(
+                topic = "/topic/room/random/$userId"
+            )
             startMatching(userId)
         }
 
     }
 
-    private suspend fun startMatching(userId: String) {
+    private fun startMatching(userId: String) {
         _uiState.update { state ->
             state.copy(
                 isLoading = true
             )
         }
-//        delay(1000)
-//        _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
-//        stompRepository.sendMessage("/app/chat.random", userId)
+        stompRepository.sendMessage("/app/chat.random", userId)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stompRepository.disconnect()
     }
 }
