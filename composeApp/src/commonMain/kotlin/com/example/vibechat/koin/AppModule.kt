@@ -6,6 +6,7 @@ import com.example.vibechat.domain.intefaces.UserRepository
 import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.ConversationsViewModel
 import com.example.vibechat.ui.screens.chatscreen.ChatScreenViewModel
+import com.example.vibechat.ui.screens.loginscreen.LoginViewModel
 import com.example.vibechat.ui.screens.matchscreen.RandomMatchViewModel
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingViewModel
 import com.example.vibechat.ui.screens.signupscreen.SignUpViewModel
@@ -27,7 +28,8 @@ val viewmodelModule = module {
     viewModel { OnboardingViewModel(get()) }
     viewModel { SignUpViewModel(get(),get()) }
     viewModel { ChatScreenViewModel(get(),get()) }
-    viewModel { RandomMatchViewModel(get(),get(),get() ) }
+    viewModel { RandomMatchViewModel(get(),get(),get(),get() ) }
+    viewModel { LoginViewModel( get(),get()) }
 
 }
 val provideHttpClientModule = module {

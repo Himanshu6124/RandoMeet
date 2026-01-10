@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,10 +46,12 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SignUpUI(
-    onSignUpSuccess: () -> Unit
+    onSignUpSuccess: () -> Unit,
+    onNavigateToLoginScreen : () -> Unit,
 ) {
     val viewModel: SignUpViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
+    val scrollState = rememberScrollState()
 
 
     LaunchedEffect(Unit){
@@ -87,6 +91,7 @@ fun SignUpUI(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(top = 140.dp, start = 20.dp, end = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -98,13 +103,22 @@ fun SignUpUI(
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
 
                     Text(
                         text = "Create your profile",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = "Already have an account?",
+                        color = Color.Blue,
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .clickable{onNavigateToLoginScreen()}
+                        ,
                     )
 
                     OutlinedTextField(

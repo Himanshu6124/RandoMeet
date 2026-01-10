@@ -4,8 +4,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.constants.CONSTANTS.TOKEN_KEY
+import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.User
+import com.example.vibechat.data.model.repository.AuthResponse
 import com.example.vibechat.domain.intefaces.UserRepository
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -72,15 +74,16 @@ class SignUpViewModel(
             print("Response of sign up is $res")
             res?.let {
                 _effect.emit(SignUpSideEffect.NavigateToMatchScreen)
-                updateTokenInDataStore(res.jwt)
+                updateTokenInDataStore(res)
             }
         }
     }
-    fun updateTokenInDataStore(value: String){
+    fun updateTokenInDataStore(value: AuthResponse){
         viewModelScope.launch {
             dataStore.updateData {
                 it.toMutablePreferences().apply {
-                    set(TOKEN_KEY, value)
+                    set(TOKEN_KEY, value.jwt)
+                    set(USER_ID, value.userId)
                 }
             }
         }

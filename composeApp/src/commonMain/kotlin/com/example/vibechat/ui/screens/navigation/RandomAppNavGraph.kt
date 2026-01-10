@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.ui.screens.chatscreen.ChatScreen
+import com.example.vibechat.ui.screens.loginscreen.LoginUI
+import com.example.vibechat.ui.screens.loginscreen.LoginUIState
 import com.example.vibechat.ui.screens.matchscreen.ChatCardData
 import com.example.vibechat.ui.screens.matchscreen.HomeScreenV2
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingScreen
@@ -18,7 +20,7 @@ fun RandomAppNavGraph(){
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route,
+        startDestination = Screen.Login.route,
     ){
         composable(route = Screen.Splash.route) {
             OnboardingScreen(
@@ -35,6 +37,21 @@ fun RandomAppNavGraph(){
             SignUpUI(
                 onSignUpSuccess = {
                     navController.navigate(Screen.RandomMatch.route)
+                },
+                onNavigateToLoginScreen = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
+        }
+
+        composable(route = Screen.Login.route) {
+            LoginUI(
+                onNavigateToMatchScreen = {
+                    navController.navigate(Screen.RandomMatch.route)
+
+                },
+                onNavigateToSignUpScreen = {
+                    navController.navigate(Screen.SignUp.route)
                 }
             )
         }

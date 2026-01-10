@@ -11,6 +11,13 @@ sealed interface Screen {
             get() = "Sign up"
     }
 
+    data object Login : Screen {
+        override val route: String
+            get() = "login"
+        override val name: String
+            get() = "Log in"
+    }
+
     data object Splash : Screen {
         override val route: String
             get() = "splash"

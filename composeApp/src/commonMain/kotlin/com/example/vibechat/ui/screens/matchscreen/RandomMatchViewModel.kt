@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.SocketRepo
+import com.example.vibechat.domain.intefaces.UserRepository
 import com.example.vibechat.koin.DeviceInfo
 import com.example.vibechat.socket.SocketRepository
 import kotlinx.coroutines.delay
@@ -13,8 +14,17 @@ import kotlinx.coroutines.launch
 class RandomMatchViewModel(
     private val deviceInfo: DeviceInfo,
     private val stompRepository: SocketRepository,
-    private val chatRepo: ChatRepo
+    private val chatRepo: ChatRepo,
+    private val userRepository: UserRepository
 ) : BaseViewModel<RandomMatchUIState, RandomMatchEvent, RandomMatchSideEffect>(){
+
+    init {
+        viewModelScope.launch {
+            val res = userRepository.getUser("him")
+            println("User is $res")
+
+        }
+    }
 
     override val initialState: RandomMatchUIState
         get() = RandomMatchUIState()
