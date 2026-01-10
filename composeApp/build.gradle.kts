@@ -68,10 +68,14 @@ kotlin {
 
             implementation(libs.androidx.datastore.preferences.core) //datastore
             implementation(libs.navigation.compose)
-//            implementation(libs.coil.compose)
-//            implementation(coil.network.ktor)
+            implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+            implementation(libs.coil.compose)
+//            implementation(libs.coil.network.ktor)
 
 
+            //datastore
+            implementation(libs.datastore.preferences)
+            implementation(libs.datastore)
 
         }
         commonTest.dependencies {

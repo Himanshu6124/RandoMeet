@@ -20,12 +20,15 @@ import org.koin.dsl.module
 
 expect val platformModule : Module
 
+expect val dataStoreModule: Module
+
 val viewmodelModule = module {
     viewModel { ConversationsViewModel(get()) }
-    viewModel { OnboardingViewModel(get(),get()) }
+    viewModel { OnboardingViewModel(get()) }
     viewModel { SignUpViewModel(get(),get()) }
     viewModel { ChatScreenViewModel(get(),get()) }
     viewModel { RandomMatchViewModel(get(),get(),get() ) }
+
 }
 val provideHttpClientModule = module {
     single {

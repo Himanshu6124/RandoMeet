@@ -1,6 +1,10 @@
 package com.example.vibechat.constants
 
+import androidx.datastore.preferences.core.stringPreferencesKey
+
 object CONSTANTS {
 
-    const val USER_ID = "user_id"
+    const val MATCHED_CONVERSATION = "matched_conversation"
+    val TOKEN_KEY = stringPreferencesKey("token")
+
 }

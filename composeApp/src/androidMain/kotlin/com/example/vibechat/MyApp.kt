@@ -1,6 +1,7 @@
 package com.example.vibechat
 
 import android.app.Application
+import com.example.vibechat.koin.dataStoreModule
 import com.example.vibechat.koin.platformModule
 import com.example.vibechat.koin.provideHttpClientModule
 import com.example.vibechat.koin.repositoryModule
@@ -16,6 +17,7 @@ class MyApp : Application() {
             androidContext(this@MyApp)  // ⬅️ This provides 'context'
             modules(
                 platformModule,
+                dataStoreModule,
                 viewmodelModule,
                 provideHttpClientModule,
                 repositoryModule,

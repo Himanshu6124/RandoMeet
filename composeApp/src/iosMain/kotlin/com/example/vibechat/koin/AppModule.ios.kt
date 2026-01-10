@@ -7,3 +7,5 @@ actual val platformModule: Module
     get() = module {
         single<DeviceInfo> { IOSDeviceInfo() }
     }
+actual val dataStoreModule: Module
+    get() = TODO("Not yet implemented")

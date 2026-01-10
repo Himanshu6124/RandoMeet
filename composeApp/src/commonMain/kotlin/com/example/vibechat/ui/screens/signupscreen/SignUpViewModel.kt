@@ -1,16 +1,18 @@
 package com.example.vibechat.ui.screens.signupscreen
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
+import com.example.vibechat.constants.CONSTANTS.TOKEN_KEY
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.User
 import com.example.vibechat.domain.intefaces.UserRepository
-import com.example.vibechat.koin.DeviceInfo
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(
     private val userRepository: UserRepository,
-    private val deviceInfo: DeviceInfo
+    private val dataStore: DataStore<Preferences>
 ) : BaseViewModel<SignUpUIState,SignUpEvent,SignUpSideEffect >() {
 
     override val initialState: SignUpUIState
@@ -43,19 +45,43 @@ class SignUpViewModel(
                     it.copy(userName = event.userName)
                 }
             }
+
+            is SignUpEvent.OnNameChange -> {
+                _uiState.update {
+                    it.copy(name = event.name)
+                }
+            }
+            is SignUpEvent.OnPasswordChange -> {
+                _uiState.update {
+                    it.copy(password = event.password)
+                }
+            }
         }
     }
     fun handleSignUpClick() {
         viewModelScope.launch {
             val res = userRepository.saveUser(
                 User(
-                    deviceId = deviceInfo.getDeviceId(),
-                    name = uiState.value.userName,
-                    gender = uiState.value.selectedGender.displayName,
+                    name = _uiState.value.name,
+                    username = _uiState.value.userName,
+                    password = _uiState.value.password,
+                    gender = _uiState.value.selectedGender.displayName,
+                    email = "email_hp@gmail.com"
                 )
             )
+            print("Response of sign up is $res")
             res?.let {
                 _effect.emit(SignUpSideEffect.NavigateToMatchScreen)
+                updateTokenInDataStore(res.jwt)
+            }
+        }
+    }
+    fun updateTokenInDataStore(value: String){
+        viewModelScope.launch {
+            dataStore.updateData {
+                it.toMutablePreferences().apply {
+                    set(TOKEN_KEY, value)
+                }
             }
         }
     }

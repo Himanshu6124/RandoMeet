@@ -30,7 +30,7 @@ class RandomMatchViewModel(
                         matchingConversation = conversation
                     )
                 }
-                _effect.emit(RandomMatchSideEffect.NavigateToChatScreen)
+                _effect.emit(RandomMatchSideEffect.NavigateToChatScreen(conversation))
             }
         }
     }

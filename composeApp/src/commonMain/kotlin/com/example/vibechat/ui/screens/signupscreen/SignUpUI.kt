@@ -1,6 +1,5 @@
 package com.example.vibechat.ui.screens.signupscreen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,16 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.ui.commoncomposables.LoadNetworkImage
 import kotlinx.coroutines.flow.collectLatest
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-import vibechat.composeapp.generated.resources.Res
-import vibechat.composeapp.generated.resources.user_profile
 
 @Composable
 fun SignUpUI(
@@ -118,7 +114,36 @@ fun SignUpUI(
                                 SignUpEvent.OnUserNameChange(it)
                             )
                         },
+                        label = { Text("Your user name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        singleLine = true
+                    )
+
+
+                    OutlinedTextField(
+                        value = uiState.name,
+                        onValueChange = {
+                            viewModel.handleEvent(
+                                SignUpEvent.OnNameChange(it)
+                            )
+                        },
                         label = { Text("Your name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        singleLine = true
+                    )
+
+
+                    OutlinedTextField(
+                        value = uiState.password,
+                        visualTransformation = PasswordVisualTransformation(),
+                        onValueChange = {
+                            viewModel.handleEvent(
+                                SignUpEvent.OnPasswordChange(it)
+                            )
+                        },
+                        label = { Text("Your password") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         singleLine = true

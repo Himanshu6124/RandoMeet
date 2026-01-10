@@ -4,10 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.ui.screens.chatscreen.ChatScreen
+import com.example.vibechat.ui.screens.matchscreen.ChatCardData
 import com.example.vibechat.ui.screens.matchscreen.HomeScreenV2
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingScreen
 import com.example.vibechat.ui.screens.signupscreen.SignUpUI
+import kotlinx.serialization.json.Json
 
 @Composable
 fun RandomAppNavGraph(){
@@ -38,18 +41,26 @@ fun RandomAppNavGraph(){
         composable(route = Screen.RandomMatch.route) {
             HomeScreenV2(
                 onMatchFound = {
+                    val json = Json.encodeToString(it)
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        MATCHED_CONVERSATION, json
+                    )
                     navController.navigate(Screen.ChatDetail.route)
                 }
             )
         }
 
         composable(route = Screen.ChatDetail.route) {
-            ChatScreen(
-                userId = "12",
-                isRandomMatch = true,
-                chat = null,
-                navigateBack = { navController.navigateUp() }
-            )
+            val json = navController.previousBackStackEntry?.savedStateHandle?.get<String>(MATCHED_CONVERSATION)
+            json?.let {
+                val chat = Json.decodeFromString<ChatCardData>(json)
+                ChatScreen(
+                    userId = "12",
+                    isRandomMatch = true,
+                    chat = chat,
+                    navigateBack = { navController.navigateUp() }
+                )
+            }
         }
     }
 }

@@ -48,5 +48,9 @@ sealed interface Screen {
             get() = "chat_detail"
         override val name: String
             get() = "ChatDetail"
+
+        fun createRoute(id: String): String {
+            return "random_match/$id"
+        }
     }
 }

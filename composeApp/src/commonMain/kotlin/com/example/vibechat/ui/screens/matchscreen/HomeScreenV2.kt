@@ -61,7 +61,7 @@ import kotlin.math.min
 @Composable
 fun HomeScreenV2(
     modifier: Modifier = Modifier,
-    onMatchFound : () -> Unit
+    onMatchFound : (ChatCardData) -> Unit
 ) {
     val viewModel = koinViewModel<RandomMatchViewModel>()
     val uiState = viewModel.uiState.collectAsState().value
@@ -69,9 +69,9 @@ fun HomeScreenV2(
     LaunchedEffect(Unit){
         viewModel.effect.collectLatest{ effect ->
             when(effect){
-                RandomMatchSideEffect.NavigateToChatScreen -> {
+                is RandomMatchSideEffect.NavigateToChatScreen -> {
                     println("effect navigate to chat screen")
-                    onMatchFound()
+                    onMatchFound(effect.matchedConversation)
                 }
             }
         }

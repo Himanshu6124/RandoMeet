@@ -10,6 +10,8 @@ data class SignUpUIState(
     val error: Exception? = null,
     val user : User? = null,
     val userName : String = String.EMPTY,
+    val name : String = String.EMPTY,
+    val password : String = String.EMPTY,
     val selectedImage : String = String.EMPTY,
     val selectedGender : GENDER = GENDER.BOY,
     val allPictures :ArrayList<String> = arrayListOf(),
@@ -25,6 +27,8 @@ sealed interface SignUpEvent {
     data class OnUserNameChange(val userName: String) : SignUpEvent
     data class OnSelectedImageChange(val selectedImage: String) : SignUpEvent
     data class OnSelectedGenderChange(val selectedGender: GENDER) : SignUpEvent
+    data class OnNameChange(val name: String) : SignUpEvent
+    data class OnPasswordChange(val password: String) : SignUpEvent
     data object OnSignUpClick : SignUpEvent
 }
 

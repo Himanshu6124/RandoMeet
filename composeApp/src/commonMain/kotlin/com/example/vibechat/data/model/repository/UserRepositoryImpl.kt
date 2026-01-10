@@ -22,8 +22,8 @@ class UserRepositoryImpl(
         return client.get("${KtorClient.BASE_URL}/users/profile-pictures").body()
     }
 
-    override suspend fun saveUser(user: User): User? {
-        return client.post("${KtorClient.BASE_URL}/users") {
+    override suspend fun saveUser(user: User): SignUpResponse? {
+        return client.post("${KtorClient.BASE_URL}/auth/signup") {
             contentType(ContentType.Application.Json)
             setBody(user)
         }.body()
