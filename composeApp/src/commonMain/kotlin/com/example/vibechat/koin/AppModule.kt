@@ -45,5 +45,5 @@ val provideHttpClientModule = module {
 val repositoryModule = module {
     single<ChatRepo> { ChatRepo(get()) }
     single <UserRepository>{ UserRepositoryImpl(get()) }
-    single<SocketRepository> { SocketRepository() }
+    single<SocketRepository> { SocketRepository(get()) }
 }

@@ -16,10 +16,10 @@ data class ChatCardData(
     val conversationId: String = String.EMPTY,
     val friendUserName: String = String.EMPTY,
     val friendUserId: String = String.EMPTY,
-    val isTyping: Boolean = false,
-    val photoUrl: String = String.EMPTY,
+    val isTyping: Boolean? = false,
+    val photoUrl: String? = String.EMPTY,
     val lastMessage: String? = String.EMPTY,
-    val isByYou: Boolean = false,
+    val isByYou: Boolean? = false,
     val messageStatus: MessageStatus? = MessageStatus.SENT,
     val lastMessageTime: String? = String.EMPTY,
     val messageType: String? = String.EMPTY

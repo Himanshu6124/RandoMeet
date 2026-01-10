@@ -189,13 +189,13 @@ fun SendMessageButton(
             value = inputText,
             leadingIcon =  {
                 Image(
-                    painter = painterResource( Res.drawable.edit_24),
+                    painter = painterResource( Res.drawable.user_profile),
                     contentDescription = null
                 )
             } ,
             trailingIcon = {
                 Image(
-                    painter = painterResource( Res.drawable.edit_24),
+                    painter = painterResource( Res.drawable.user_profile),
                     contentDescription = null,
                     modifier = Modifier.clickable {
 

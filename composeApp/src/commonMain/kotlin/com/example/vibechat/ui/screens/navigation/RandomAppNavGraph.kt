@@ -20,7 +20,7 @@ fun RandomAppNavGraph(){
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route,
+        startDestination = Screen.Splash.route,
     ){
         composable(route = Screen.Splash.route) {
             OnboardingScreen(
