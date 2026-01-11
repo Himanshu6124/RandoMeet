@@ -39,8 +39,6 @@ class ChatScreenViewModel(
         observeIncomingMessages()
         observeTypingStatus()
         observeOnlineStatus()
-        connectToSocket()
-        sendOnlineStatus()
     }
 
     override fun handleEvent(event: ChatEvent) {
@@ -48,6 +46,18 @@ class ChatScreenViewModel(
             is ChatEvent.SendMessage -> {
                     sendMessage(message = event.message, isRandom = event.isForRandomMatching)
             }
+        }
+    }
+
+    fun iniState(conversation : Conversation?) {
+        if (conversation == null) return
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(conversation = conversation)
+            }
+            connectToSocket()
+            sendOnlineStatus()
+
         }
     }
 
@@ -126,12 +136,8 @@ class ChatScreenViewModel(
     fun connectToSocket() {
         viewModelScope.launch {
             val userId = dataStore.data.first()[USER_ID]
-            val conversationJson = savedStateHandle.get<String>(MATCHED_CONVERSATION)
-            val conversation = conversationJson?.let {
-                Json.decodeFromString<Conversation>(it)
-            }
-            val friendUserId = conversation?.friendUserId
-            val conversationId = conversation?.conversationId
+            val friendUserId = _uiState.value.conversation.friendUserId
+            val conversationId = _uiState.value.conversation.conversationId
 
             _uiState.update {
                 it.copy(userId = userId)
@@ -165,11 +171,7 @@ class ChatScreenViewModel(
     fun sendOnlineStatus() {
         viewModelScope.launch {
             val userId = dataStore.data.first()[USER_ID]
-            val conversationJson = savedStateHandle.get<String>(MATCHED_CONVERSATION)
-            val conversation = conversationJson?.let {
-                Json.decodeFromString<Conversation>(it)
-            }
-            val conversationId = conversation?.conversationId
+            val conversationId = _uiState.value.conversation.conversationId
             println("Sending online status with userId: $userId and conversationId: $conversationId")
             if (conversationId == null)
                 return@launch

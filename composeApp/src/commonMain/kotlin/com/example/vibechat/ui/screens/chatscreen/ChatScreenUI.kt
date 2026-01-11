@@ -1,6 +1,9 @@
 package com.example.vibechat.ui.screens.chatscreen
 
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -36,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,8 +49,10 @@ import coil3.compose.AsyncImage
 import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
 import com.example.vibechat.ui.commoncomposables.TextComposable
+import com.example.vibechat.ui.commoncomposables.VerticalSpacer
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
+import com.example.vibechat.ui.screens.chatscreen.components.dummyMessages
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -54,27 +62,35 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    isRandomMatch : Boolean = true,
-    chat : Conversation? = Conversation(friendUserName = "Abhishek"),
-    navigateBack : ()-> Unit = {},
+    isRandomMatch: Boolean = true,
+    chat: Conversation? = Conversation(friendUserName = "Abhishek"),
+    navigateBack: () -> Unit = {},
 ) {
-    val viewModel : ChatScreenViewModel = koinViewModel()
+    val viewModel: ChatScreenViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsState().value
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit){
-        viewModel.effect.collect{
-            when(it){
+    LaunchedEffect(Unit) {
+//        viewModel.iniState(
+//            conversation = chat
+//        )
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect {
+            when (it) {
                 is ChatSideEffect.AppendMessage -> {
                     val index = uiState.messages.size - 1
-                        if (index != -1) {
+                    if (index != -1) {
                         listState.animateScrollToItem(uiState.messages.size - 1)
                     }
                 }
+
                 is ChatSideEffect.ShowSnackBar -> {
 
                 }
+
                 is ChatSideEffect.ShowToast -> {
 
                 }
@@ -99,24 +115,8 @@ fun ChatScreen(
                 )
             }
         },
-    ) { padding ->
 
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .background(Color.Transparent)
-        ) {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                state = listState
-            ) {
-                items(uiState.messages) { message ->
-                    MessageCard("12", message) {
-//                        deleteMessage(it)
-                    }
-                }
-            }
+        bottomBar = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (uiState.isTyping) {
                     Text(
@@ -142,12 +142,25 @@ fun ChatScreen(
                     onSendMessage = {
                         viewModel.handleEvent(
                             ChatEvent.SendMessage(
-                            message = it,
-                            isForRandomMatching = isRandomMatch
-                        )
+                                message = it,
+                                isForRandomMatching = isRandomMatch
+                            )
                         )
                     }
                 )
+            }
+        }
+
+    ) { padding ->
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(padding),
+            state = listState
+        ) {
+            items(dummyMessages) { message ->
+                MessageCard(uiState.userId, message) {
+//                        deleteMessage(it)
+                }
             }
 
         }
@@ -156,11 +169,11 @@ fun ChatScreen(
 
 @Composable
 fun SendMessageButton(
-    userId : String = "",
-    conversationId :String ="",
-    inputText : String = "",
-    onTextUpdate : (String)-> Unit = {},
-    onSendMessage : (Message)-> Unit = {},
+    userId: String = "",
+    conversationId: String = "",
+    inputText: String = "",
+    onTextUpdate: (String) -> Unit = {},
+    onSendMessage: (Message) -> Unit = {},
 ) {
     Row(
     ) {
@@ -173,7 +186,7 @@ fun SendMessageButton(
                     contentDescription = null,
                     modifier = Modifier.clickable {
 
-                        if(inputText == "") return@clickable
+                        if (inputText == "") return@clickable
 
                         val newMessage = Message(
                             message = inputText,
@@ -185,12 +198,13 @@ fun SendMessageButton(
                         onSendMessage(newMessage)
                     }
                 )
-                           },
+            },
             placeholder = {
                 TextComposable(
                     text = "Type your message here ...",
                     fontWeight = FontWeight.Normal,
-                ) },
+                )
+            },
             onValueChange = onTextUpdate
         )
     }
@@ -199,10 +213,10 @@ fun SendMessageButton(
 
 @Composable
 fun ChatScreenTopBar(
-    chat: Conversation = Conversation(friendUserName = "Abhishek"),
-    isOnline : Boolean = true,
-    onBackPress: ()-> Unit = {},
-    onAddFriend: ()-> Unit = {}
+    chat: Conversation,
+    isOnline: Boolean,
+    onBackPress: () -> Unit,
+    onAddFriend: () -> Unit
 ) {
 
     Column {
@@ -211,8 +225,7 @@ fun ChatScreenTopBar(
                 .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(15.dp)
-            ,
+                .padding(15.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -220,10 +233,10 @@ fun ChatScreenTopBar(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 modifier = Modifier
                     .size(40.dp)
-                    .clickable { onBackPress() },
-                contentDescription = "back"
+                    .clickable(onClick = onBackPress),
+                contentDescription = "Back"
             )
-//
+
             AsyncImage(
                 model = chat.photoUrl,
                 contentDescription = null,
@@ -232,35 +245,28 @@ fun ChatScreenTopBar(
 
             HorizontalSpacer(15.dp)
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-
-            ) {
+            Column {
                 TextComposable(
                     text = chat.friendUserName,
                     fontSize = 18.sp
                 )
                 TextComposable(
-                    text = if(isOnline) "online" else "Offline",
+                    text = if (isOnline) "online" else "offline",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
 
             Icon(
                 imageVector = Icons.Outlined.AddCircle,
-                tint = Color.Black,
                 modifier = Modifier
-                    .padding(end = 20.dp)
                     .size(30.dp)
-                    .clickable {onAddFriend()  },
-                contentDescription = "Friends"
+                    .clickable(onClick = onAddFriend),
+                contentDescription = "Add Friend"
             )
         }
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-        )
+        HorizontalDivider()
     }
 }
