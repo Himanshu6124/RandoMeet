@@ -63,7 +63,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ChatScreen(
     modifier: Modifier = Modifier,
     isRandomMatch: Boolean = true,
-    chat: Conversation? = Conversation(friendUserName = "Abhishek"),
+    chat: Conversation?,
     navigateBack: () -> Unit = {},
 ) {
     val viewModel: ChatScreenViewModel = koinViewModel()
@@ -157,7 +157,7 @@ fun ChatScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
             state = listState
         ) {
-            items(dummyMessages + dummyMessages + dummyMessages + dummyMessages) { message ->
+            items(uiState.messages) { message ->
                 MessageCard(uiState.userId, message) {
 //                        deleteMessage(it)
                 }
