@@ -74,7 +74,7 @@ fun RandomAppNavGraph(){
                 ChatScreen(
                     userId = "12",
                     isRandomMatch = true,
-                    chat = null,
+                    chat = ChatCardData(friendUserName = "Abhishek"),
                     navigateBack = { navController.navigateUp() }
                 )
 //            }

@@ -59,6 +59,57 @@ fun MessageCard(
     }
 }
 
+val dummyMessages = listOf(
+    Message(
+        id = "1",
+        senderId = "12",
+        message = "Hey 👋",
+        status = MessageStatus.READ,
+        conversationId = "conv_123",
+        timeStamp = "10:01 AM"
+    ),
+    Message(
+        id = "2",
+        senderId = "12",
+        message = "Hi! How are you?",
+        status = MessageStatus.SENT,
+        conversationId = "conv_123",
+        timeStamp = "10:02 AM"
+    ),
+    Message(
+        id = "3",
+        senderId = "user_1",
+        message = "I’m good 😄 Working on a chat app",
+        status = MessageStatus.READ,
+        conversationId = "conv_123",
+        timeStamp = "10:03 AM"
+    ),
+    Message(
+        id = "4",
+        senderId = "12",
+        message = "Nice! Is it random chat or friends based?",
+        status = MessageStatus.DELIVERED,
+        conversationId = "conv_123",
+        timeStamp = "10:04 AM"
+    ),
+    Message(
+        id = "5",
+        senderId = "user_1",
+        message = "Random chat with online users 🔥",
+        status = MessageStatus.SENT,
+        conversationId = "conv_123",
+        timeStamp = "10:05 AM"
+    ),
+    Message(
+        id = "6",
+        senderId = "user_1",
+        message = "Planning audio calling next 🎧",
+        status = MessageStatus.SENT,
+        conversationId = "conv_123",
+        timeStamp = "10:06 AM"
+    )
+)
+
 
 data class Message(
     val id : String? = null,
