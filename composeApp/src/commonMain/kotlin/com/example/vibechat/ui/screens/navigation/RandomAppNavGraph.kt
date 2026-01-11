@@ -20,7 +20,7 @@ fun RandomAppNavGraph(){
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route,
+        startDestination = Screen.ChatDetail.route,
     ){
         composable(route = Screen.Splash.route) {
             OnboardingScreen(
@@ -69,15 +69,15 @@ fun RandomAppNavGraph(){
 
         composable(route = Screen.ChatDetail.route) {
             val json = navController.previousBackStackEntry?.savedStateHandle?.get<String>(MATCHED_CONVERSATION)
-            json?.let {
-                val chat = Json.decodeFromString<ChatCardData>(json)
+//            json?.let {
+//                val chat = Json.decodeFromString<ChatCardData>(json)
                 ChatScreen(
                     userId = "12",
                     isRandomMatch = true,
-                    chat = chat,
+                    chat = null,
                     navigateBack = { navController.navigateUp() }
                 )
-            }
+//            }
         }
     }
 }

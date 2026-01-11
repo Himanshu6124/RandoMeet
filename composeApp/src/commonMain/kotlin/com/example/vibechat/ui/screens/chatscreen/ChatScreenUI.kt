@@ -1,7 +1,6 @@
 package com.example.vibechat.ui.screens.chatscreen
 
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -39,33 +40,27 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
-import com.example.vibechat.ui.commoncomposables.LoadNetworkImage
 import com.example.vibechat.ui.commoncomposables.TextComposable
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
 import com.example.vibechat.ui.screens.matchscreen.ChatCardData
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import vibechat.composeapp.generated.resources.Res
-import vibechat.composeapp.generated.resources.edit_24
-import vibechat.composeapp.generated.resources.outline_arrow_forward_24
-import vibechat.composeapp.generated.resources.user_profile
 
+@Preview
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    userId: String,
-    isRandomMatch : Boolean,
-    chat : ChatCardData?,
-    navigateBack : ()-> Unit,
+    userId: String = "",
+    isRandomMatch : Boolean = true,
+    chat : ChatCardData? = ChatCardData(),
+    navigateBack : ()-> Unit = {},
 ) {
     val viewModel : ChatScreenViewModel = koinViewModel()
     var inputText by remember { mutableStateOf("") }
-//    val messages = viewModel.uiState.collectAsState().value.messages
+    val messages = viewModel.uiState.collectAsState().value.messages
     val isOnline = viewModel.isOnline.collectAsState()
     val isTyping = viewModel.isTyping.collectAsState()
     val listState = rememberLazyListState()
@@ -75,12 +70,12 @@ fun ChatScreen(
     fun addMessage(newMessage: Message) {
         viewModel.addMessage(newMessage)
         inputText = ""
-//        scope.launch {
-//            val index = messages.size - 1
-//            if (index != -1) {
-//                listState.animateScrollToItem(messages.size - 1)
-//            }
-//        }
+        scope.launch {
+            val index = messages.size - 1
+            if (index != -1) {
+                listState.animateScrollToItem(messages.size - 1)
+            }
+        }
     }
 
     LaunchedEffect(message) {
@@ -88,24 +83,24 @@ fun ChatScreen(
     }
 
 
-//    LaunchedEffect(Unit) {
-//        viewModel.getMessages(chat?.conversationId ?: "")
-//        viewModel.connectToSocket(
-//            friendUserId = chat?.friendUserId ?: "",
-//            conversationId = chat?.conversationId ?: "",
-//            senderId = userId.orEmpty()
-//        )
-//        viewModel.sendOnlineStatus(userId ?: "", chat?.conversationId ?: "")
+    LaunchedEffect(Unit) {
+        viewModel.getMessages(chat?.conversationId ?: "")
+        viewModel.connectToSocket(
+            friendUserId = chat?.friendUserId ?: "",
+            conversationId = chat?.conversationId ?: "",
+            senderId = userId.orEmpty()
+        )
+        viewModel.sendOnlineStatus(userId ?: "", chat?.conversationId ?: "")
 //        viewModel.getUserStatus(
 //            friendId = chat?.friendUserId.orEmpty(),
 //            conversationId = chat?.conversationId.orEmpty()
 //        )
-//    }
-
-
-    fun deleteMessage(message: Message) {
-//        messages.remove(message)
     }
+
+//
+//    fun deleteMessage(message: Message) {
+//        messages.remove(message)
+//    }
 
     Scaffold(
         topBar = {
@@ -135,11 +130,11 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f),
                 state = listState
             ) {
-//                items(messages) { message ->
-//                    MessageCard(userId, message) {
+                items(messages) { message ->
+                    MessageCard(userId, message) {
 //                        deleteMessage(it)
-//                    }
-//                }
+                    }
+                }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (isTyping.value) {
@@ -174,28 +169,23 @@ fun ChatScreen(
     }
 }
 
+@Preview
 @Composable
 fun SendMessageButton(
-    userId : String,
-    conversationId :String,
-    inputText : String,
-    onTextUpdate : (String)-> Unit,
-    onSendMessage : (Message)-> Unit,
+    userId : String = "",
+    conversationId :String ="",
+    inputText : String = "",
+    onTextUpdate : (String)-> Unit = {},
+    onSendMessage : (Message)-> Unit = {},
 ) {
     Row(
     ) {
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = inputText,
-            leadingIcon =  {
-                Image(
-                    painter = painterResource( Res.drawable.user_profile),
-                    contentDescription = null
-                )
-            } ,
             trailingIcon = {
-                Image(
-                    painter = painterResource( Res.drawable.user_profile),
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = null,
                     modifier = Modifier.clickable {
 
@@ -222,27 +212,33 @@ fun SendMessageButton(
     }
 }
 
+
+@Preview
 @Composable
 fun ChatScreenTopBar(
-    chat: ChatCardData,
-    isOnline : Boolean,
-    onBackPress: ()-> Unit,
-    onAddFriend: ()-> Unit
+    chat: ChatCardData = ChatCardData(friendUserName = "Abhishek"),
+    isOnline : Boolean = true,
+    onBackPress: ()-> Unit = {},
+    onAddFriend: ()-> Unit = {}
 ) {
 
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 30.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(15.dp)
+            ,
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-//            Icon(
-//                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-//                modifier = Modifier
-//                    .size(40.dp)
-//                    .clickable { onBackPress() },
-//                contentDescription = "back"
-//            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable { onBackPress() },
+                contentDescription = "back"
+            )
 //
             AsyncImage(
                 model = chat.photoUrl,
@@ -253,7 +249,8 @@ fun ChatScreenTopBar(
             HorizontalSpacer(15.dp)
 
             Column(
-                verticalArrangement = Arrangement.SpaceAround,
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+
             ) {
                 TextComposable(
                     text = chat.friendUserName,
@@ -268,56 +265,18 @@ fun ChatScreenTopBar(
 
             Spacer(modifier = Modifier.weight(1f))
 
-//            Icon(
-//                imageVector = Icons.Outlined.AddCircle,
-//                tint = Color.Black,
-//                modifier = Modifier
-//                    .padding(end = 20.dp)
-//                    .size(30.dp)
-//                    .clickable {onAddFriend()  },
-//                contentDescription = "Friends"
-//            )
-
-//            Icon(
-//                imageVector = Icons.Outlined.Call,
-//                tint = Color.Black,
-//                modifier = Modifier
-//                    .padding(end = 20.dp)
-//                    .size(30.dp)
-//                    .clickable {  },
-//                contentDescription = "back"
-//            )
+            Icon(
+                imageVector = Icons.Outlined.AddCircle,
+                tint = Color.Black,
+                modifier = Modifier
+                    .padding(end = 20.dp)
+                    .size(30.dp)
+                    .clickable {onAddFriend()  },
+                contentDescription = "Friends"
+            )
         }
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
         )
     }
-}
-
-
-@Preview
-@Composable
-fun ContactCard(){
-    Row(
-        modifier = Modifier
-            .background(Color.Red)
-            .padding(12.dp)
-
-        ,
-    ) {
-        Image(
-            painter = painterResource( Res.drawable.user_profile),
-            contentDescription = null,
-            modifier = Modifier.size(12.dp)
-        )
-        HorizontalSpacer(15.dp)
-        Column(
-            verticalArrangement = Arrangement.SpaceAround,
-        ) {
-            TextComposable(
-                text = "John Doe",
-                fontSize = 18.sp
-            )
-    }
-}
 }

@@ -31,7 +31,7 @@ fun main() {
 
         when(result){
             is ApiResult.Error -> TODO()
-            is ApiResult.Success<*> -> TODO()
+            is ApiResult.Success -> TODO()
         }
 
 

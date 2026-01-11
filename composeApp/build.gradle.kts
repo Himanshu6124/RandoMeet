@@ -71,6 +71,10 @@ kotlin {
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation(libs.coil.compose)
 //            implementation(libs.coil.network.ktor)
+            implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
+
+//            implementation("androidx.compose.material:material-icons-extended:1.7.3")
+
 
 
             //datastore
