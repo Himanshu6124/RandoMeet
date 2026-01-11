@@ -57,6 +57,7 @@ class ChatScreenViewModel(
             }
             connectToSocket()
             sendOnlineStatus()
+            getFriendStatus()
 
         }
     }
@@ -178,6 +179,19 @@ class ChatScreenViewModel(
 
             val onlineStatus = OnlineStatus(senderId = userId, conversationId = conversationId, online = true)
             socketRepository.sendMessage("/app/chat.online", onlineStatus)
+        }
+    }
+
+    fun getFriendStatus() {
+        viewModelScope.launch {
+            val conversationId = _uiState.value.conversation.conversationId
+            val friendId = _uiState.value.conversation.friendUserId
+            println("getting online status with frined: $friendId and conversationId: $conversationId")
+            if (conversationId == null)
+                return@launch
+
+            val onlineStatus = OnlineStatus(senderId = friendId, conversationId = conversationId)
+            socketRepository.sendMessage("/chat.user.status", onlineStatus)
         }
     }
 

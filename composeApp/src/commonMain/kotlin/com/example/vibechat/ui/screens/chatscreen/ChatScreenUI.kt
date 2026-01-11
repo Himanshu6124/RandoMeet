@@ -72,9 +72,9 @@ fun ChatScreen(
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
-//        viewModel.iniState(
-//            conversation = chat
-//        )
+        viewModel.iniState(
+            conversation = chat
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -157,7 +157,7 @@ fun ChatScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
             state = listState
         ) {
-            items(dummyMessages) { message ->
+            items(dummyMessages + dummyMessages + dummyMessages + dummyMessages) { message ->
                 MessageCard(uiState.userId, message) {
 //                        deleteMessage(it)
                 }
