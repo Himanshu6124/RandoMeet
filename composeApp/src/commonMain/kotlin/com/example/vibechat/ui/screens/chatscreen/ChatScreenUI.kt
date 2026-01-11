@@ -32,7 +32,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,10 +45,8 @@ import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
 import com.example.vibechat.ui.commoncomposables.TextComposable
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
-import com.example.vibechat.ui.screens.chatscreen.components.dummyMessages
-import com.example.vibechat.ui.screens.matchscreen.ChatCardData
+import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -57,46 +54,22 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
-    userId: String = "",
     isRandomMatch : Boolean = true,
-    chat : ChatCardData? = ChatCardData(friendUserName = "Abhishek"),
+    chat : Conversation? = Conversation(friendUserName = "Abhishek"),
     navigateBack : ()-> Unit = {},
 ) {
     val viewModel : ChatScreenViewModel = koinViewModel()
+    val uiState = viewModel.uiState.collectAsState().value
     var inputText by remember { mutableStateOf("") }
-    val messages = viewModel.uiState.collectAsState().value.messages
-    val isOnline by viewModel.isOnline.collectAsState()
-    val isTyping by viewModel.isTyping.collectAsState()
     val listState = rememberLazyListState()
-//    val message =  viewModel.message.collectAsState()
-
-
-    LaunchedEffect(Unit) {
-//        viewModel.getMessages(chat?.conversationId ?: "")
-        viewModel.connectToSocket(
-            friendUserId = chat?.friendUserId ?: "",
-            conversationId = chat?.conversationId ?: "",
-            senderId = userId.orEmpty()
-        )
-//        viewModel.sendOnlineStatus(userId ?: "", chat?.conversationId ?: "")
-//        viewModel.getUserStatus(
-//            friendId = chat?.friendUserId.orEmpty(),
-//            conversationId = chat?.conversationId.orEmpty()
-//        )
-    }
-
-//
-//    fun deleteMessage(message: Message) {
-//        messages.remove(message)
-//    }
 
     LaunchedEffect(Unit){
         viewModel.effect.collect{
             when(it){
                 is ChatSideEffect.AppendMessage -> {
-                    val index = messages.size - 1
+                    val index = uiState.messages.size - 1
                         if (index != -1) {
-                        listState.animateScrollToItem(messages.size - 1)
+                        listState.animateScrollToItem(uiState.messages.size - 1)
                     }
                 }
                 is ChatSideEffect.ShowSnackBar -> {
@@ -115,7 +88,7 @@ fun ChatScreen(
             if (chat != null) {
                 ChatScreenTopBar(
                     chat = chat,
-                    isOnline = true,
+                    isOnline = uiState.isOnline,
                     onBackPress = navigateBack,
                     onAddFriend = {
 //                        viewModel.sendFriendRequest(
@@ -138,14 +111,14 @@ fun ChatScreen(
                 modifier = Modifier.weight(1f),
                 state = listState
             ) {
-                items(dummyMessages) { message ->
+                items(uiState.messages) { message ->
                     MessageCard("12", message) {
 //                        deleteMessage(it)
                     }
                 }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (isTyping) {
+                if (uiState.isTyping) {
                     Text(
                         "typing...",
                         modifier = Modifier.padding(
@@ -155,16 +128,16 @@ fun ChatScreen(
                     )
                 }
                 SendMessageButton(
-                    userId = userId ?: "",
+                    userId = uiState.userId.orEmpty(),
                     conversationId = chat?.conversationId ?: "",
                     inputText = inputText,
                     onTextUpdate = {
                         inputText = it
-//                        viewModel.onUserTyping(
-//                            senderId = userId ?: "",
-//                            conversationId = chat?.conversationId.orEmpty(),
-//                            inputText = it
-//                        )
+                        viewModel.onUserTyping(
+                            senderId = uiState.userId.orEmpty(),
+                            conversationId = chat?.conversationId.orEmpty(),
+                            inputText = it
+                        )
                     },
                     onSendMessage = {
                         viewModel.handleEvent(
@@ -226,7 +199,7 @@ fun SendMessageButton(
 
 @Composable
 fun ChatScreenTopBar(
-    chat: ChatCardData = ChatCardData(friendUserName = "Abhishek"),
+    chat: Conversation = Conversation(friendUserName = "Abhishek"),
     isOnline : Boolean = true,
     onBackPress: ()-> Unit = {},
     onAddFriend: ()-> Unit = {}

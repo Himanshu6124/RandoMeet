@@ -6,12 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.vibechat.constants.CONSTANTS.TOKEN_KEY
 import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
-import com.example.vibechat.data.model.repository.ChatRepo
-import com.example.vibechat.data.model.repository.SocketRepo
 import com.example.vibechat.domain.intefaces.UserRepository
 import com.example.vibechat.koin.DeviceInfo
 import com.example.vibechat.socket.SocketRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -55,7 +52,7 @@ class RandomMatchViewModel(
 
     override val initialState: RandomMatchUIState
         get() = RandomMatchUIState()
-    private val _conversation = stompRepository.chatCardData
+    private val _conversation = stompRepository.matchedConversation
 
     init {
         viewModelScope.launch {
@@ -100,7 +97,7 @@ class RandomMatchViewModel(
                 isLoading = true
             )
         }
-        stompRepository.sendMessage("/app/chat.random", userId)
+        stompRepository.sendMessage("/app/chat.random", null)
     }
 
     override fun onCleared() {

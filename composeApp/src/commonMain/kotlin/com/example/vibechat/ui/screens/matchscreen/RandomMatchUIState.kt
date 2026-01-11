@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 data class RandomMatchUIState(
-    val matchingConversation: ChatCardData = ChatCardData(),
+    val matchingConversation: Conversation = Conversation(),
     val isLoading: Boolean = false,
     val exception: Exception? = null
 )
 
 @Serializable
-data class ChatCardData(
+data class Conversation(
     val conversationId: String = String.EMPTY,
     val friendUserName: String = String.EMPTY,
     val friendUserId: String = String.EMPTY,
@@ -34,5 +34,5 @@ sealed interface RandomMatchEvent {
 }
 
 sealed interface RandomMatchSideEffect {
-    data class NavigateToChatScreen(val matchedConversation: ChatCardData) : RandomMatchSideEffect
+    data class NavigateToChatScreen(val matchedConversation: Conversation) : RandomMatchSideEffect
 }

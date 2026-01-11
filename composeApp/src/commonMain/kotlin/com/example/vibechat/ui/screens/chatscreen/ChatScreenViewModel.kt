@@ -1,33 +1,47 @@
 package com.example.vibechat.ui.screens.chatscreen
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
+import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
-import com.example.vibechat.ui.screens.matchscreen.ChatCardData
+import com.example.vibechat.ui.screens.matchscreen.Conversation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 class ChatScreenViewModel(
     private val chatRepository: ChatRepo,
-    private val socketRepository: SocketRepository
+    private val socketRepository: SocketRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val dataStore: DataStore<Preferences>
 ) : BaseViewModel<ChatUIState, ChatEvent, ChatSideEffect>() {
 
-    override val initialState: ChatUIState = ChatUIState()
+    override val initialState: ChatUIState
+        get() = ChatUIState()
 
     private var typingJob: Job? = null
     private var hasSentTypingStatus = false
     private val typingDelayMillis = 1000L
-    val message: StateFlow<Message?> = socketRepository.messages
-    val isOnline: StateFlow<Boolean> = socketRepository.onlineStatus
-    val isTyping: StateFlow<Boolean> = socketRepository.isTyping
-    val chatCardData: StateFlow<ChatCardData> = socketRepository.chatCardData
+    init {
+        observeIncomingMessages()
+        observeTypingStatus()
+        observeOnlineStatus()
+        connectToSocket()
+        sendOnlineStatus()
+    }
 
     override fun handleEvent(event: ChatEvent) {
         when (event) {
@@ -37,11 +51,46 @@ class ChatScreenViewModel(
         }
     }
 
+    private fun observeTypingStatus(){
+        viewModelScope.launch {
+            socketRepository.isTyping.collect { isTyping ->
+                _uiState.update {
+                    it.copy(isTyping = isTyping)
+                }
+            }
+        }
+    }
+
+    private fun observeOnlineStatus(){
+        viewModelScope.launch {
+            socketRepository.onlineStatus.collect { isOnline ->
+                _uiState.update {
+                    it.copy(isOnline = isOnline)
+                }
+            }
+        }
+    }
+
+    private fun observeIncomingMessages() {
+        viewModelScope.launch {
+            socketRepository.messages
+                .filterNotNull()   // VERY IMPORTANT
+                .collect { newMessage ->
+                    addMessage(newMessage)
+                }
+
+        }
+    }
+
     fun addMessage(message: Message) {
-        val current = _uiState.value.messages.toMutableList()
-        current.add(message)
-        _uiState.update {
-            it.copy(messages = current)
+        viewModelScope.launch {
+            _uiState.update {
+                val messages = it.messages.toMutableList().apply {
+                    add(message)
+                }
+                it.copy(messages = messages)
+            }
+            _effect.emit(ChatSideEffect.AppendMessage(message))
         }
     }
 
@@ -74,9 +123,26 @@ class ChatScreenViewModel(
         }
     }
 
-    fun connectToSocket(friendUserId: String, conversationId: String, senderId: String) {
+    fun connectToSocket() {
         viewModelScope.launch {
-            socketRepository.connect(userId = senderId)
+            val userId = dataStore.data.first()[USER_ID]
+            val conversationJson = savedStateHandle.get<String>(MATCHED_CONVERSATION)
+            val conversation = conversationJson?.let {
+                Json.decodeFromString<Conversation>(it)
+            }
+            val friendUserId = conversation?.friendUserId
+            val conversationId = conversation?.conversationId
+
+            _uiState.update {
+                it.copy(userId = userId)
+            }
+
+            println("Connecting to socket with userId: $userId and conversationId: $conversationId and friendUserId: $friendUserId")
+
+            if (userId == null || friendUserId == null || conversationId == null) {
+                return@launch
+            }
+            socketRepository.connect(userId = userId)
             socketRepository.subscribe(topic = "/topic/room/$friendUserId-$conversationId")
         }
     }
@@ -84,6 +150,7 @@ class ChatScreenViewModel(
     private fun sendMessage(message: Message, isRandom: Boolean) {
         viewModelScope.launch {
             val destination = if (isRandom) "/app/chat.random.send" else "/app/chat.send"
+            println("Sending message to $destination with message: $message")
             socketRepository.sendMessage(destination, message)
             _uiState.update {
                 val messages = it.messages.toMutableList().apply {
@@ -95,10 +162,19 @@ class ChatScreenViewModel(
         }
     }
 
-    fun sendOnlineStatus(senderId: String, conversationId: String) {
+    fun sendOnlineStatus() {
         viewModelScope.launch {
-            val onlineStatus =
-                OnlineStatus(senderId = senderId, conversationId = conversationId, online = true)
+            val userId = dataStore.data.first()[USER_ID]
+            val conversationJson = savedStateHandle.get<String>(MATCHED_CONVERSATION)
+            val conversation = conversationJson?.let {
+                Json.decodeFromString<Conversation>(it)
+            }
+            val conversationId = conversation?.conversationId
+            println("Sending online status with userId: $userId and conversationId: $conversationId")
+            if (conversationId == null)
+                return@launch
+
+            val onlineStatus = OnlineStatus(senderId = userId, conversationId = conversationId, online = true)
             socketRepository.sendMessage("/app/chat.online", onlineStatus)
         }
     }

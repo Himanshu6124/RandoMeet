@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,10 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.vibechat.koin.ToastManager
-import com.example.vibechat.koin.getDeviceInfo
 import com.example.vibechat.koin.showToast
-import com.example.vibechat.ui.screens.ConversationsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -61,7 +57,7 @@ import kotlin.math.min
 @Composable
 fun HomeScreenV2(
     modifier: Modifier = Modifier,
-    onMatchFound : (ChatCardData) -> Unit
+    onMatchFound : (Conversation) -> Unit
 ) {
     val viewModel = koinViewModel<RandomMatchViewModel>()
     val uiState = viewModel.uiState.collectAsState().value

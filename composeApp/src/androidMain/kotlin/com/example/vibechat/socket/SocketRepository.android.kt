@@ -8,16 +8,13 @@ import com.example.vibechat.constants.CONSTANTS.TOKEN_KEY
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
-import com.example.vibechat.ui.screens.matchscreen.ChatCardData
+import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import org.koin.compose.koinInject
-import org.koin.java.KoinJavaComponent.inject
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
@@ -38,8 +35,8 @@ actual class SocketRepository actual constructor(
     private val _isTyping = MutableStateFlow(false)
     actual val isTyping: StateFlow<Boolean> = _isTyping
 
-    private val _chatCardData = MutableStateFlow(ChatCardData())
-    actual val chatCardData: StateFlow<ChatCardData> = _chatCardData
+    private val _chatCardData = MutableStateFlow(Conversation())
+    actual val matchedConversation: StateFlow<Conversation> = _chatCardData
 
 
     @SuppressLint("CheckResult")
@@ -68,42 +65,80 @@ actual class SocketRepository actual constructor(
         topic : String,
     ) {
         stompClient?.topic(topic)?.subscribe { topicMessage ->
-            Log.d("STOMP", "Received: ${topicMessage.payload}")
-
             try {
-                val jsonObject = JsonParser.parseString(topicMessage.payload).asJsonObject
+                val jsonObject = JsonParser
+                    .parseString(topicMessage.payload)
+                    .asJsonObject
 
-                when {
-                    jsonObject.has("message") -> {
-                        val message = gson.fromJson(topicMessage.payload, Message::class.java)
-                        _messages.value = message
+                val parsedEvent = parseEvent(jsonObject)
+                when(parsedEvent){
+                    is SocketEvent.ChatCardEvent -> {
+                        _chatCardData.tryEmit(parsedEvent.chat)
+
                     }
-                    jsonObject.has("online") -> {
-                        val status = gson.fromJson(topicMessage.payload, OnlineStatus::class.java)
-                        _onlineStatus.value = status.online
+                    is SocketEvent.MessageEvent -> {
+                        _messages.tryEmit(parsedEvent.message)
+
                     }
-                    jsonObject.has("typing") -> {
-                        val status = gson.fromJson(topicMessage.payload, TypingStatus::class.java)
-                        _isTyping.value = status.typing
+                    is SocketEvent.OnlineEvent -> {
+                        _onlineStatus.tryEmit(parsedEvent.online.online)
                     }
-                    jsonObject.has("friendUserName") -> {
-                        val conversation = gson.fromJson(topicMessage.payload, ChatCardData::class.java)
-                        _chatCardData.value = conversation
+                    is SocketEvent.TypingEvent -> {
+                        _isTyping.tryEmit(parsedEvent.typing.typing)
+
                     }
-                    else -> {
-                        Log.w("STOMP", "Unknown payload: ${topicMessage.payload}")
+                    null -> {
+                        Log.w("STOMP", "Unknown event type ${jsonObject}")
                     }
                 }
             } catch (e: Exception) {
-                Log.e("STOMP", "Parse error", e)
+                Log.e("STOMP", "Socket parse error", e)
+            }
+        }
+    }
+
+    private fun parseEvent(json: JsonObject): SocketEvent? {
+        val type = json.get("type")?.asString ?: return null
+        val payload = json.getAsJsonObject("payload")
+
+        return when (type) {
+            "MESSAGE" ->
+                SocketEvent.MessageEvent(
+                    gson.fromJson(payload, Message::class.java)
+                )
+
+            "TYPING" ->
+                SocketEvent.TypingEvent(
+                    gson.fromJson(payload, TypingStatus::class.java)
+                )
+
+            "ONLINE_STATUS" ->
+                SocketEvent.OnlineEvent(
+                    gson.fromJson(payload, OnlineStatus::class.java)
+                )
+
+            "CONVERSATION_DTO" ->
+                SocketEvent.ChatCardEvent(
+                    gson.fromJson(payload, Conversation::class.java)
+                )
+
+            else -> {
+                SocketEvent.ChatCardEvent(
+                    gson.fromJson(payload, Conversation::class.java)
+                )
             }
         }
     }
 
 
-    actual fun sendMessage(destination: String, message: Any) {
-        val json = Gson().toJson(message)
-        stompClient?.send(destination)?.subscribe()
+    actual fun sendMessage(destination: String, message: Any?) {
+        if(message == null) {
+            stompClient?.send(destination)?.subscribe()
+        }else{
+            val json = Gson().toJson(message)
+            stompClient?.send(destination,json)?.subscribe()
+        }
+   
     }
 
     actual fun disconnect() {
@@ -112,6 +147,12 @@ actual class SocketRepository actual constructor(
             Log.d("STOMP", "Disconnected")
         }
     }
+}
+sealed interface SocketEvent {
+    data class MessageEvent(val message: Message) : SocketEvent
+    data class TypingEvent(val typing: TypingStatus) : SocketEvent
+    data class OnlineEvent(val online: OnlineStatus) : SocketEvent
+    data class ChatCardEvent(val chat: Conversation) : SocketEvent
 }
 
 
