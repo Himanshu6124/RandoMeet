@@ -12,11 +12,12 @@ data class ChatUIState(
 )
 
 sealed interface ChatEvent {
-    data class SendMessage(val message: Message) : ChatEvent
+    data class SendMessage(val message: Message , val isForRandomMatching : Boolean ) : ChatEvent
 }
 
 sealed interface ChatSideEffect {
     data class ShowSnackBar(val message: String) : ChatSideEffect
+    data class AppendMessage(val message: Message) : ChatSideEffect
     data class ShowToast(val message: String) : ChatSideEffect
 }
 

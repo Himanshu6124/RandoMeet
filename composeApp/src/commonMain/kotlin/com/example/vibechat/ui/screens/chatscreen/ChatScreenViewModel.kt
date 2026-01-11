@@ -32,7 +32,7 @@ class ChatScreenViewModel(
     override fun handleEvent(event: ChatEvent) {
         when (event) {
             is ChatEvent.SendMessage -> {
-
+                    sendMessage(message = event.message, isRandom = event.isForRandomMatching)
             }
         }
     }
@@ -81,10 +81,17 @@ class ChatScreenViewModel(
         }
     }
 
-    fun sendMessage(message: Message, isRandom: Boolean) {
+    private fun sendMessage(message: Message, isRandom: Boolean) {
         viewModelScope.launch {
             val destination = if (isRandom) "/app/chat.random.send" else "/app/chat.send"
             socketRepository.sendMessage(destination, message)
+            _uiState.update {
+                val messages = it.messages.toMutableList().apply {
+                    add(message)
+                }
+                it.copy(messages = messages)
+            }
+            _effect.emit(ChatSideEffect.AppendMessage(message))
         }
     }
 

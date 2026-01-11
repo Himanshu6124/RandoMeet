@@ -62,38 +62,22 @@ fun ChatScreen(
     chat : ChatCardData? = ChatCardData(friendUserName = "Abhishek"),
     navigateBack : ()-> Unit = {},
 ) {
-//    val viewModel : ChatScreenViewModel = koinViewModel()
-//    var inputText by remember { mutableStateOf("") }
-//    val messages = viewModel.uiState.collectAsState().value.messages
-//    val isOnline = viewModel.isOnline.collectAsState()
-//    val isTyping = viewModel.isTyping.collectAsState()
-//    val listState = rememberLazyListState()
-//    val scope = rememberCoroutineScope()
+    val viewModel : ChatScreenViewModel = koinViewModel()
+    var inputText by remember { mutableStateOf("") }
+    val messages = viewModel.uiState.collectAsState().value.messages
+    val isOnline by viewModel.isOnline.collectAsState()
+    val isTyping by viewModel.isTyping.collectAsState()
+    val listState = rememberLazyListState()
 //    val message =  viewModel.message.collectAsState()
-
-//    fun addMessage(newMessage: Message) {
-//        viewModel.addMessage(newMessage)
-//        inputText = ""
-//        scope.launch {
-//            val index = messages.size - 1
-//            if (index != -1) {
-//                listState.animateScrollToItem(messages.size - 1)
-//            }
-//        }
-//    }
-
-//    LaunchedEffect(message) {
-//        message.value?.let { addMessage(it) }
-//    }
 
 
     LaunchedEffect(Unit) {
 //        viewModel.getMessages(chat?.conversationId ?: "")
-//        viewModel.connectToSocket(
-//            friendUserId = chat?.friendUserId ?: "",
-//            conversationId = chat?.conversationId ?: "",
-//            senderId = userId.orEmpty()
-//        )
+        viewModel.connectToSocket(
+            friendUserId = chat?.friendUserId ?: "",
+            conversationId = chat?.conversationId ?: "",
+            senderId = userId.orEmpty()
+        )
 //        viewModel.sendOnlineStatus(userId ?: "", chat?.conversationId ?: "")
 //        viewModel.getUserStatus(
 //            friendId = chat?.friendUserId.orEmpty(),
@@ -105,6 +89,26 @@ fun ChatScreen(
 //    fun deleteMessage(message: Message) {
 //        messages.remove(message)
 //    }
+
+    LaunchedEffect(Unit){
+        viewModel.effect.collect{
+            when(it){
+                is ChatSideEffect.AppendMessage -> {
+                    val index = messages.size - 1
+                        if (index != -1) {
+                        listState.animateScrollToItem(messages.size - 1)
+                    }
+                }
+                is ChatSideEffect.ShowSnackBar -> {
+
+                }
+                is ChatSideEffect.ShowToast -> {
+
+                }
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -132,7 +136,7 @@ fun ChatScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
-//                state = listState
+                state = listState
             ) {
                 items(dummyMessages) { message ->
                     MessageCard("12", message) {
@@ -141,7 +145,7 @@ fun ChatScreen(
                 }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (true) {
+                if (isTyping) {
                     Text(
                         "typing...",
                         modifier = Modifier.padding(
@@ -153,9 +157,9 @@ fun ChatScreen(
                 SendMessageButton(
                     userId = userId ?: "",
                     conversationId = chat?.conversationId ?: "",
-                    inputText = "inputText",
+                    inputText = inputText,
                     onTextUpdate = {
-//                        inputText = it
+                        inputText = it
 //                        viewModel.onUserTyping(
 //                            senderId = userId ?: "",
 //                            conversationId = chat?.conversationId.orEmpty(),
@@ -163,8 +167,12 @@ fun ChatScreen(
 //                        )
                     },
                     onSendMessage = {
-//                        viewModel.sendMessage(message = it, isRandom = isRandomMatch)
-//                        addMessage(it)
+                        viewModel.handleEvent(
+                            ChatEvent.SendMessage(
+                            message = it,
+                            isForRandomMatching = isRandomMatch
+                        )
+                        )
                     }
                 )
             }
@@ -173,7 +181,6 @@ fun ChatScreen(
     }
 }
 
-@Preview
 @Composable
 fun SendMessageButton(
     userId : String = "",
@@ -217,7 +224,6 @@ fun SendMessageButton(
 }
 
 
-@Preview
 @Composable
 fun ChatScreenTopBar(
     chat: ChatCardData = ChatCardData(friendUserName = "Abhishek"),
