@@ -68,6 +68,7 @@ class SignUpViewModel(
                     username = _uiState.value.userName,
                     password = _uiState.value.password,
                     gender = _uiState.value.selectedGender.displayName,
+                    photoUrl = _uiState.value.selectedImage,
                     email = "email_hp@gmail.com"
                 )
             )

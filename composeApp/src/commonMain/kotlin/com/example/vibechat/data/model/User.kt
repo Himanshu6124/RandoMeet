@@ -9,7 +9,7 @@ data class User(
     val email: String? = null,
     val gender: String? = null,
     val bio: String? = null,
-    val photoId: String? = null,
+    val photoUrl: String? = null,
     val location: String? = null,
     val status: String? = null,
     val suspectLevel: Int? = null,
