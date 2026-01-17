@@ -43,11 +43,11 @@ class RandomMatchViewModel(
             )
 
     init {
-        viewModelScope.launch {
-            val res = userRepository.getUser("him")
-            println("User is $res")
-
-        }
+//        viewModelScope.launch {
+//            val res = userRepository.getUser("him")
+//            println("User is $res")
+//
+//        }
     }
 
     override val initialState: RandomMatchUIState

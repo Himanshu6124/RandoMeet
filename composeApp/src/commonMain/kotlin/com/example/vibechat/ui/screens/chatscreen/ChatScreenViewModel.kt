@@ -191,7 +191,7 @@ class ChatScreenViewModel(
                 return@launch
 
             val onlineStatus = OnlineStatus(senderId = friendId, conversationId = conversationId)
-            socketRepository.sendMessage("/chat.user.status", onlineStatus)
+            socketRepository.sendMessage("/app/chat.user.status", onlineStatus)
         }
     }
 
