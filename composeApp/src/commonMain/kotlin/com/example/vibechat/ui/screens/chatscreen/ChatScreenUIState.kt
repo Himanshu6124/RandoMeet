@@ -22,7 +22,7 @@ sealed interface ChatEvent {
 
 sealed interface ChatSideEffect {
     data class ShowSnackBar(val message: String) : ChatSideEffect
-    data class AppendMessage(val message: Message) : ChatSideEffect
+    data class ScrollToBottom(val index: Int) : ChatSideEffect
     data class ShowToast(val message: String) : ChatSideEffect
 }
 

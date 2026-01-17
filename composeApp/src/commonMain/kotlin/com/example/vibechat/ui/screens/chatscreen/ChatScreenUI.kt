@@ -80,10 +80,9 @@ fun ChatScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect {
             when (it) {
-                is ChatSideEffect.AppendMessage -> {
-                    val index = uiState.messages.size - 1
-                    if (index != -1) {
-                        listState.animateScrollToItem(uiState.messages.size - 1)
+                is ChatSideEffect.ScrollToBottom -> {
+                    if (it.index != -1) {
+                        listState.animateScrollToItem(it.index)
                     }
                 }
 

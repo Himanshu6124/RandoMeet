@@ -101,7 +101,7 @@ class ChatScreenViewModel(
                 }
                 it.copy(messages = messages)
             }
-            _effect.emit(ChatSideEffect.AppendMessage(message))
+            _effect.emit(ChatSideEffect.ScrollToBottom(uiState.value.messages.lastIndex))
         }
     }
 
@@ -165,7 +165,7 @@ class ChatScreenViewModel(
                 }
                 it.copy(messages = messages)
             }
-            _effect.emit(ChatSideEffect.AppendMessage(message))
+            _effect.emit(ChatSideEffect.ScrollToBottom(uiState.value.messages.lastIndex))
         }
     }
 
