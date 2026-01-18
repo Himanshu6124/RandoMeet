@@ -16,36 +16,51 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.core.utils.EMPTY
+import com.example.vibechat.ui.commoncomposables.whiteColor
+import com.example.vibechat.ui.screens.chatscreen.greyGradient
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@Preview
 @Composable
 fun MessageCard(
-    userId :String?,
-    message: Message ,
-    onDeleteMessage : (Message)-> Unit
+    userId :String? = "fa",
+    message: Message = dummyMessages[0] ,
+    onDeleteMessage : (Message)-> Unit = {}
 ){
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = if(message.senderId == userId ) 0.dp else 20.dp, start = 4.dp,end = 4.dp),
+        modifier =
+            Modifier
+                .background(Color.Black)
+                .fillMaxWidth()
+                .padding(bottom = if(message.senderId == userId ) 0.dp else 20.dp, start = 8.dp,end = 8.dp)
+        ,
         horizontalArrangement = if(message.senderId == userId ) Arrangement.End else Arrangement.Start
     ) {
         Column(
-            modifier = Modifier.clickable { onDeleteMessage(message) },
+            modifier = Modifier
+                .clickable { onDeleteMessage(message) }
+                .background(Color.Black)
+            ,
         ){
             Text(
                 text = message.message,
+                color = whiteColor,
                 modifier = Modifier.background(
-                    shape = RoundedCornerShape(40),
+                    shape = RoundedCornerShape(50),
                     color = Color.Gray
                 ).padding(10.dp)
             )
 
             Text(
+                color = whiteColor,
                 modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
                 text = "12:43 pm",
                 fontSize = 10.sp
             )
             if(message.senderId == userId ){
                 Text(
+                    color = whiteColor,
                     modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
                     text = when(message.status){
                         MessageStatus.SENT -> "sent"

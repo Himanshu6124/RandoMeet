@@ -1,9 +1,12 @@
 package com.example.vibechat.ui.screens.chatscreen
 
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -25,9 +29,11 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,6 +58,7 @@ import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.koin.showToast
 import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
 import com.example.vibechat.ui.commoncomposables.TextComposable
+import com.example.vibechat.ui.commoncomposables.whiteColor
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
 import com.example.vibechat.ui.screens.chatscreen.components.dummyMessages
@@ -58,7 +67,6 @@ import com.example.vibechat.ui.screens.matchscreen.MessageStatus
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
-@Preview
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
@@ -130,6 +138,7 @@ fun ChatScreen(
 
 
     Scaffold(
+        containerColor = Color.Black,
         topBar = {
             if (chat != null) {
                 ChatScreenTopBar(
@@ -210,7 +219,17 @@ fun SendMessageButton(
     Row(
     ) {
         TextField(
-            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Black,
+                unfocusedContainerColor = Color.Black,
+                focusedPlaceholderColor = Color.White,
+                unfocusedPlaceholderColor = Color.White,
+                focusedTrailingIconColor = Color.White,
+                unfocusedTrailingIconColor = Color.White,
+            ),
+
+            modifier = Modifier.fillMaxWidth()
+                .border(1.dp, color = Color.Gray),
             value = inputText,
             trailingIcon = {
                 Icon(
@@ -250,14 +269,24 @@ fun ChatScreenTopBar(
     onBackPress: () -> Unit,
     onAddFriend: () -> Unit
 ) {
+    var selected by remember { mutableStateOf("Match") }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+            .padding(bottom = 10.dp)
+            .fillMaxWidth()
+            .greyGradient()
+            .padding(8.dp)
+        ,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        TopSection(
+            selected = selected,
+            onSelect = { selected = it }
+        )
+
         Row(
-            modifier = Modifier
-                .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(15.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -266,7 +295,8 @@ fun ChatScreenTopBar(
                 modifier = Modifier
                     .size(40.dp)
                     .clickable(onClick = onBackPress),
-                contentDescription = "Back"
+                contentDescription = "Back",
+                tint = whiteColor
             )
 
             AsyncImage(
@@ -280,9 +310,11 @@ fun ChatScreenTopBar(
             Column {
                 TextComposable(
                     text = chat.friendUserName,
+                    color = whiteColor,
                     fontSize = 18.sp
                 )
                 TextComposable(
+                    color = whiteColor,
                     text = if (isOnline) "online" else "offline",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal
@@ -296,10 +328,10 @@ fun ChatScreenTopBar(
                 modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = onAddFriend),
-                contentDescription = "Add Friend"
+                contentDescription = "Add Friend",
+                tint = whiteColor
             )
         }
-        HorizontalDivider()
     }
 }
 @Composable
@@ -313,24 +345,92 @@ fun prevChatTopBar(){
     )
 }
 
-@Preview
+fun Modifier.greyGradient(): Modifier {
+   return this.background(
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF181A20), // deep dark
+                Color(0xFF23242B)  // slightly lighter dark
+            )
+        )
+    )
+}
+
+
 @Composable
-fun TopSection(){
+fun TopSection(
+    selected: String,
+    onSelect: (String) -> Unit
+) {
+    val items = listOf("Match", "Friends")
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
-    ){
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.onSurface,
+                shape = RoundedCornerShape(50)
+            )
+        ,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items.forEach { item ->
+            TopItem(
+                title = item,
+                selected = selected == item,
+                onClick = { onSelect(item) }
+            )
+        }
+    }
+}
+@Composable
+fun TopItem(
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val backgroundColor by animateColorAsState(
+        if (selected)
+            MaterialTheme.colorScheme.onSurfaceVariant
+        else
+            Color.Transparent,
+        label = ""
+    )
 
-        TopItem("Random Screen")
-        TopItem("Random Screen")
+    val textColor by animateColorAsState(
+        if (selected)
+            MaterialTheme.colorScheme.onPrimary
+        else
+            MaterialTheme.colorScheme.onSurfaceVariant,
+        label = ""
+    )
 
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(backgroundColor)
+            .clickable { onClick() }
+            .padding(horizontal = 24.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            color = textColor,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
+@Preview(showBackground = false)
 @Composable
-fun TopItem(title: String){
-
-    TextComposable(
-        text = title,
+fun TopSectionPreview() {
+    var selected by remember { mutableStateOf("Match") }
+    TopSection(
+        selected = selected,
+        onSelect = {
+            selected = it
+        }
     )
-
 }
+

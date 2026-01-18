@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.koin.showToast
+import com.example.vibechat.ui.screens.chatscreen.greyGradient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -77,14 +78,8 @@ fun HomeScreenV2(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF181A20), // deep dark
-                        Color(0xFF23242B)  // slightly lighter dark
-                    )
-                )
-            ),
+            .greyGradient()
+            ,
         contentAlignment = Alignment.Center
     ) {
         // Content column
