@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
 
 @Composable
@@ -130,4 +131,9 @@ data class TypingStatus(
     val senderId: String?= null,
     val conversationId: String,
     val typing: Boolean = false ,
+)
+
+data class DisconnectStatus(
+    val senderId: String?= null,
+    val conversationId: String = String.EMPTY ,
 )

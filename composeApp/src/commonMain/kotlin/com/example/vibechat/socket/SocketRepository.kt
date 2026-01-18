@@ -10,6 +10,7 @@ expect class SocketRepository(dataStore: DataStore<Preferences>) {
     val matchedConversation: StateFlow<Conversation>
     val onlineStatus: StateFlow<Boolean>
     val isTyping: StateFlow<Boolean>
+    val disconnectedUserName: StateFlow<String?>
     val messages: StateFlow<Message?>
     suspend fun connect(userId : String)
     fun disconnect()

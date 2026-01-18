@@ -1,9 +1,6 @@
 package com.example.vibechat.ui.screens.chatscreen
 
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -26,12 +21,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,15 +39,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.compose.AsyncImage
 import com.example.vibechat.core.utils.EMPTY
+import com.example.vibechat.koin.showToast
 import com.example.vibechat.ui.commoncomposables.HorizontalSpacer
 import com.example.vibechat.ui.commoncomposables.TextComposable
-import com.example.vibechat.ui.commoncomposables.VerticalSpacer
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
 import com.example.vibechat.ui.screens.chatscreen.components.dummyMessages
@@ -63,18 +63,44 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ChatScreen(
     modifier: Modifier = Modifier,
     isRandomMatch: Boolean = true,
-    chat: Conversation?,
+    chat: Conversation? = Conversation(),
     navigateBack: () -> Unit = {},
+    navigateToMatchScreen:() -> Unit
 ) {
     val viewModel: ChatScreenViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsState().value
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    println("On start called")
+                    viewModel.handleEvent(ChatEvent.InitState(chat))
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    viewModel.handleEvent(ChatEvent.DisconnectSocket)
+                    println("On Stop called")
+                }
+                Lifecycle.Event.ON_DESTROY ->{
+                    println("On Destroy called")
+                    viewModel.disconnectSocketPermanently()
+                }
+                else -> Unit
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(Unit) {
-        viewModel.iniState(
-            conversation = chat
-        )
+        viewModel.handleEvent(ChatEvent.InitState(chat))
     }
 
     LaunchedEffect(Unit) {
@@ -93,6 +119,11 @@ fun ChatScreen(
                 is ChatSideEffect.ShowToast -> {
 
                 }
+
+                is ChatSideEffect.NavigateToMatchScreen ->{
+                    showToast("${it.disconnectedUserName} disconnected")
+                    navigateToMatchScreen()
+                }
             }
         }
     }
@@ -106,6 +137,8 @@ fun ChatScreen(
                     isOnline = uiState.isOnline,
                     onBackPress = navigateBack,
                     onAddFriend = {
+                        viewModel.disconnectSocketPermanently()
+                        navigateToMatchScreen()
 //                        viewModel.sendFriendRequest(
 //                            userId = userId.orEmpty(),
 //                            friendId = chat.friendUserId
@@ -259,7 +292,7 @@ fun ChatScreenTopBar(
             Spacer(Modifier.weight(1f))
 
             Icon(
-                imageVector = Icons.Outlined.AddCircle,
+                imageVector = Icons.Outlined.Delete,
                 modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = onAddFriend),
@@ -268,4 +301,36 @@ fun ChatScreenTopBar(
         }
         HorizontalDivider()
     }
+}
+@Composable
+fun prevChatTopBar(){
+    ChatScreenTopBar(
+        chat = Conversation(friendUserName = "Hp"),
+        isOnline = true,
+        onAddFriend = {},
+        onBackPress = {}
+
+    )
+}
+
+@Preview
+@Composable
+fun TopSection(){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+    ){
+
+        TopItem("Random Screen")
+        TopItem("Random Screen")
+
+    }
+}
+
+@Composable
+fun TopItem(title: String){
+
+    TextComposable(
+        text = title,
+    )
+
 }

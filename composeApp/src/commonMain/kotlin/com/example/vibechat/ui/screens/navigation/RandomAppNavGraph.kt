@@ -73,7 +73,10 @@ fun RandomAppNavGraph(){
                 ChatScreen(
                     isRandomMatch = true,
                     chat = chat,
-                    navigateBack = { navController.navigateUp() }
+                    navigateBack = { navController.navigateUp() },
+                    navigateToMatchScreen = {
+                        navController.navigate(Screen.RandomMatch.route)
+                    }
                 )
             }
         }

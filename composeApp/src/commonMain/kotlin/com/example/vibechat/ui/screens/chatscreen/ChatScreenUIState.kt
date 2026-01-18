@@ -18,11 +18,14 @@ data class ChatUIState(
 
 sealed interface ChatEvent {
     data class SendMessage(val message: Message , val isForRandomMatching : Boolean ) : ChatEvent
+    data object DisconnectSocket : ChatEvent
+    data class InitState(val conversation: Conversation?) : ChatEvent
 }
 
 sealed interface ChatSideEffect {
     data class ShowSnackBar(val message: String) : ChatSideEffect
     data class ScrollToBottom(val index: Int) : ChatSideEffect
     data class ShowToast(val message: String) : ChatSideEffect
+    data class NavigateToMatchScreen(val disconnectedUserName: String?) : ChatSideEffect
 }
 

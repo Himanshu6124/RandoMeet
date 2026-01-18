@@ -9,6 +9,7 @@ import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.socket.SocketRepository
+import com.example.vibechat.ui.screens.chatscreen.components.DisconnectStatus
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
@@ -39,6 +40,7 @@ class ChatScreenViewModel(
         observeIncomingMessages()
         observeTypingStatus()
         observeOnlineStatus()
+        observeDisconnectedStatus()
     }
 
     override fun handleEvent(event: ChatEvent) {
@@ -46,6 +48,9 @@ class ChatScreenViewModel(
             is ChatEvent.SendMessage -> {
                     sendMessage(message = event.message, isRandom = event.isForRandomMatching)
             }
+
+            ChatEvent.DisconnectSocket -> disconnectSocket()
+            is ChatEvent.InitState -> iniState(event.conversation)
         }
     }
 
@@ -57,8 +62,6 @@ class ChatScreenViewModel(
             }
             connectToSocket()
             sendOnlineStatus()
-            getFriendStatus()
-
         }
     }
 
@@ -225,6 +228,27 @@ class ChatScreenViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        disconnectSocket()
+    }
+
+    fun observeDisconnectedStatus(){
+        viewModelScope.launch {
+            socketRepository.disconnectedUserName.collect { disconnectedUserName ->
+                _effect.emit(ChatSideEffect.NavigateToMatchScreen(disconnectedUserName))
+            }
+        }
+    }
+
+    fun disconnectSocketPermanently() {
+        val disconnectedStatus = DisconnectStatus(
+            conversationId = _uiState.value.conversation.conversationId,
+            senderId = _uiState.value.conversation.friendUserName
+        )
+        socketRepository.sendMessage("/app/chat.disconnect", disconnectedStatus)
+        disconnectSocket()
+
+    }
+    fun disconnectSocket(){
         socketRepository.disconnect()
     }
 }

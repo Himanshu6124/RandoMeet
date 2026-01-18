@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.vibechat.constants.CONSTANTS.TOKEN_KEY
+import com.example.vibechat.core.utils.EMPTY
+import com.example.vibechat.ui.screens.chatscreen.components.DisconnectStatus
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
@@ -34,6 +36,9 @@ actual class SocketRepository actual constructor(
 
     private val _isTyping = MutableStateFlow(false)
     actual val isTyping: StateFlow<Boolean> = _isTyping
+    private val _disconnectedUserName : MutableStateFlow<String?> = MutableStateFlow(String.EMPTY)
+
+    actual val disconnectedUserName: StateFlow<String?> = _disconnectedUserName
 
     private val _chatCardData = MutableStateFlow(Conversation())
     actual val matchedConversation: StateFlow<Conversation> = _chatCardData
@@ -90,6 +95,10 @@ actual class SocketRepository actual constructor(
                     null -> {
                         Log.w("STOMP", "Unknown event type ${jsonObject}")
                     }
+
+                    is SocketEvent.DisconnectEvent -> {
+                        _disconnectedUserName.tryEmit(parsedEvent.status.senderId)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("STOMP", "Socket parse error", e)
@@ -120,6 +129,10 @@ actual class SocketRepository actual constructor(
             "CONVERSATION_DTO" ->
                 SocketEvent.ChatCardEvent(
                     gson.fromJson(payload, Conversation::class.java)
+                )
+            "DISCONNECTED_DTO" ->
+                SocketEvent.DisconnectEvent(
+                    gson.fromJson(payload, DisconnectStatus::class.java)
                 )
 
             else -> {
@@ -153,6 +166,7 @@ sealed interface SocketEvent {
     data class TypingEvent(val typing: TypingStatus) : SocketEvent
     data class OnlineEvent(val online: OnlineStatus) : SocketEvent
     data class ChatCardEvent(val chat: Conversation) : SocketEvent
+    data class DisconnectEvent(val status: DisconnectStatus) : SocketEvent
 }
 
 
