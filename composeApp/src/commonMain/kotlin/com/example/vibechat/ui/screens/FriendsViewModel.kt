@@ -3,7 +3,7 @@ package com.example.vibechat.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vibechat.data.model.User
-import com.example.vibechat.data.model.repository.FriendRepo
+import com.example.vibechat.data.model.repository.FriendRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class FriendsViewModel : ViewModel() {
 
-    private val friendsRepository = FriendRepo()
+    private val friendsRepository = FriendRepository()
 
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
@@ -46,32 +46,32 @@ class FriendsViewModel : ViewModel() {
 //        }
 //    }
 
-    fun getFriendsConversations(userId: String) {
-        viewModelScope.launch {
-
-            _uiState.update { state ->
-                state.copy(
-                    isLoading = true
-                )
-            }
-
-            try {
-                val res = friendsRepository.getFriendConversations(userId)
-                _uiState.update { state ->
-                    state.copy(
-                        friends = res ?: arrayListOf(),
-                        isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false
-                    )
-                }
-            }
-        }
-    }
+//    fun getFriendsConversations(userId: String) {
+//        viewModelScope.launch {
+//
+//            _uiState.update { state ->
+//                state.copy(
+//                    isLoading = true
+//                )
+//            }
+//
+//            try {
+//                val res = friendsRepository.getFriendConversations(userId)
+//                _uiState.update { state ->
+//                    state.copy(
+//                        friends = res ?: arrayListOf(),
+//                        isLoading = false
+//                    )
+//                }
+//            } catch (e: Exception) {
+//                _uiState.update { state ->
+//                    state.copy(
+//                        isLoading = false
+//                    )
+//                }
+//            }
+//        }
+//    }
 
     fun getPendingFriendRequests(userId: String) {
         viewModelScope.launch {

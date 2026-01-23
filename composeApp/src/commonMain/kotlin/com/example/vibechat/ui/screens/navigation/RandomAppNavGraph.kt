@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.ui.screens.chatscreen.ChatScreen
+import com.example.vibechat.ui.screens.friendsscreen.FriendsScreenUI
 import com.example.vibechat.ui.screens.loginscreen.LoginUI
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.ui.screens.matchscreen.HomeScreenV2
@@ -64,6 +65,22 @@ fun RandomAppNavGraph(){
                     navController.navigate(Screen.ChatDetail.route)
                 }
             )
+
+//            ChatScreen(
+//                isRandomMatch = true,
+//                chat = Conversation(friendUserName = "fs"),
+//                navigateBack = { navController.navigateUp() },
+//                navigateToMatchScreen = {
+//                    navController.navigate(Screen.RandomMatch.route)
+//                },
+//                onTabChange = {
+//                    if(it == "Friends"){
+//                        navController.navigate(Screen.FriendsScreen.route)
+//                    }else{
+//                        navController.navigateUp()
+//                    }
+//                }
+//            )
         }
 
         composable(route = Screen.ChatDetail.route) {
@@ -76,9 +93,36 @@ fun RandomAppNavGraph(){
                     navigateBack = { navController.navigateUp() },
                     navigateToMatchScreen = {
                         navController.navigate(Screen.RandomMatch.route)
+                    },
+                    onTabChange = {
+                        if(it == "Friends"){
+                            navController.navigate(Screen.FriendsScreen.route)
+                        }
                     }
                 )
             }
+        }
+
+        composable(
+            route = Screen.FriendsScreen.route,
+        ) {
+            FriendsScreenUI(
+                onFriendClick = {
+                    val json = Json.encodeToString(it)
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        MATCHED_CONVERSATION, json
+                    )
+                    navController.navigate(Screen.ChatDetail.createRoute(false))
+                },
+                onBackPress = {
+                    navController.navigateUp()
+                },
+                onTabChange = {
+                    if(it == "Match"){
+                        navController.navigateUp()
+                    }
+                }
+            )
         }
     }
 }

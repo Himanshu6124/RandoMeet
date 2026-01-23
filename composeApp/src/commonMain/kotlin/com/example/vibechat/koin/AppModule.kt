@@ -1,11 +1,13 @@
 package com.example.vibechat.koin
 
 import com.example.vibechat.data.model.repository.ChatRepo
+import com.example.vibechat.data.model.repository.FriendRepository
 import com.example.vibechat.data.model.repository.UserRepositoryImpl
 import com.example.vibechat.domain.intefaces.UserRepository
 import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.ConversationsViewModel
 import com.example.vibechat.ui.screens.chatscreen.ChatScreenViewModel
+import com.example.vibechat.ui.screens.friendsscreen.FriendsViewModel
 import com.example.vibechat.ui.screens.loginscreen.LoginViewModel
 import com.example.vibechat.ui.screens.matchscreen.RandomMatchViewModel
 import com.example.vibechat.ui.screens.onboardingscreen.OnboardingViewModel
@@ -30,6 +32,7 @@ val viewmodelModule = module {
     viewModel { ChatScreenViewModel(get(), get(), get(), get()) }
     viewModel { RandomMatchViewModel(get(),get(),get(),get() ) }
     viewModel { LoginViewModel( get(),get()) }
+    viewModel { FriendsViewModel( get()) }
 
 }
 val provideHttpClientModule = module {
@@ -46,4 +49,5 @@ val repositoryModule = module {
     single<ChatRepo> { ChatRepo(get()) }
     single <UserRepository>{ UserRepositoryImpl(get()) }
     single<SocketRepository> { SocketRepository(get()) }
+    single<FriendRepository> { FriendRepository(get()) }
 }

@@ -73,7 +73,8 @@ fun ChatScreen(
     isRandomMatch: Boolean = true,
     chat: Conversation? = Conversation(),
     navigateBack: () -> Unit = {},
-    navigateToMatchScreen:() -> Unit
+    navigateToMatchScreen:() -> Unit,
+    onTabChange: (String) -> Unit
 ) {
     val viewModel: ChatScreenViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsState().value
@@ -105,10 +106,6 @@ fun ChatScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(ChatEvent.InitState(chat))
     }
 
     LaunchedEffect(Unit) {
@@ -152,7 +149,8 @@ fun ChatScreen(
 //                            userId = userId.orEmpty(),
 //                            friendId = chat.friendUserId
 //                        )
-                    }
+                    },
+                    onTabChange = onTabChange
                 )
             }
         },
@@ -267,10 +265,11 @@ fun ChatScreenTopBar(
     chat: Conversation,
     isOnline: Boolean,
     onBackPress: () -> Unit,
-    onAddFriend: () -> Unit
+    onAddFriend: () -> Unit,
+    onTabChange: (String) -> Unit
 ) {
-    var selected by remember { mutableStateOf("Match") }
 
+    var selectedTab by remember { mutableStateOf("Match") }
     Column(
         modifier = Modifier
             .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
@@ -282,8 +281,8 @@ fun ChatScreenTopBar(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TopSection(
-            selected = selected,
-            onSelect = { selected = it }
+            selected = selectedTab,
+            onSelect = onTabChange
         )
 
         Row(
@@ -340,7 +339,8 @@ fun prevChatTopBar(){
         chat = Conversation(friendUserName = "Hp"),
         isOnline = true,
         onAddFriend = {},
-        onBackPress = {}
+        onBackPress = {},
+        onTabChange = {}
 
     )
 }

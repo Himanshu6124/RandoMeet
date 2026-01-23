@@ -52,12 +52,23 @@ sealed interface Screen {
 
     data object ChatDetail : Screen {
         override val route: String
-            get() = "chat_detail"
+            get() = "chat_detail/{is_random}"
         override val name: String
             get() = "ChatDetail"
 
+        fun createRoute(isRandom: Boolean): String {
+            return "chat_detail/$isRandom"
+        }
+    }
+
+    data object FriendsScreen : Screen {
+        override val route: String
+            get() = "friends"
+        override val name: String
+            get() = "friends"
+
         fun createRoute(id: String): String {
-            return "random_match/$id"
+            return "friends/$id"
         }
     }
 }

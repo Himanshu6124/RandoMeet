@@ -10,8 +10,9 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import com.example.vibechat.data.model.network.KtorClient.BASE_URL
+import com.example.vibechat.ui.screens.matchscreen.Conversation
 
-class FriendRepo(
+class FriendRepository(
     private val client: HttpClient = KtorClient.httpClient
 ) {
 
@@ -27,7 +28,7 @@ class FriendRepo(
         }
     }
 
-    suspend fun getFriendConversations(userId: String): List<ChatCardData> =
+    suspend fun getFriendConversations(userId: String): List<Conversation>? =
         client.get("$BASE_URL/friendships/conversations/$userId").body()
 
 }
