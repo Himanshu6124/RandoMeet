@@ -32,7 +32,7 @@ val viewmodelModule = module {
     viewModel { ConversationsViewModel(get()) }
     viewModel { OnboardingViewModel(get()) }
     viewModel { SignUpViewModel(get(),get()) }
-    viewModel { ChatScreenViewModel(get(), get(), get(), get()) }
+    viewModel { ChatScreenViewModel(get(), get(), get(), get(),get()) }
     viewModel { RandomMatchViewModel(get(),get(),get(),get() ) }
     viewModel { LoginViewModel( get(),get()) }
     viewModel { FriendsViewModel( get()) }

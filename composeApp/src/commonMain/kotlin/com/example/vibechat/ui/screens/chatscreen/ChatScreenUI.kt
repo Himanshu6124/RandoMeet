@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -140,12 +141,7 @@ fun ChatScreen(
                     isOnline = uiState.isOnline,
                     onBackPress = navigateBack,
                     onAddFriend = {
-                        viewModel.disconnectSocketPermanently()
-                        navigateToMatchScreen()
-//                        viewModel.sendFriendRequest(
-//                            userId = userId.orEmpty(),
-//                            friendId = chat.friendUserId
-//                        )
+                        viewModel.sendFriendRequest(friendId = chat.friendUserId)
                     },
                     onTabChange = onTabChange
                 )
@@ -164,6 +160,7 @@ fun ChatScreen(
                     )
                 }
                 SendMessageButton(
+                    isRandomMatch = isRandomMatch,
                     userId = uiState.userId.orEmpty(),
                     conversationId = chat?.conversationId ?: "",
                     inputText = inputText,
@@ -182,6 +179,10 @@ fun ChatScreen(
                                 isForRandomMatching = isRandomMatch
                             )
                         )
+                    },
+                    onSkipClick = {
+                        viewModel.disconnectSocketPermanently()
+                        navigateToMatchScreen()
                     }
                 )
             }
@@ -205,11 +206,13 @@ fun ChatScreen(
 
 @Composable
 fun SendMessageButton(
+    isRandomMatch: Boolean,
     userId: String = "",
     conversationId: String = "",
     inputText: String = "",
     onTextUpdate: (String) -> Unit = {},
     onSendMessage: (Message) -> Unit = {},
+    onSkipClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -219,6 +222,14 @@ fun SendMessageButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
+        if(isRandomMatch){
+            Text(
+                text = "Skip",
+                color = Color.White,
+                modifier = Modifier.clickable{ onSkipClick() }
+            )
+        }
         TextField(
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFF2C2C2E),

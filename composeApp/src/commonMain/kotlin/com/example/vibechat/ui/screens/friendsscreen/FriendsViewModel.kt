@@ -13,6 +13,10 @@ class FriendsViewModel(
     override val initialState: FriendsUIState
         get() = FriendsUIState()
 
+    init {
+        getFriends()
+    }
+
     override fun handleEvent(event: FriendsEvent) {
         when (event) {
             is FriendsEvent.OnFabClick -> {

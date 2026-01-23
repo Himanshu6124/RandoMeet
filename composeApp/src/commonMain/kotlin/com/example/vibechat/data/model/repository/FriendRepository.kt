@@ -28,6 +28,14 @@ class FriendRepository(
         }
     }
 
+    suspend fun sendFriendRequest(
+        friendId: String,
+    ) {
+        client.post("$BASE_URL/friendships/request/$friendId/send"){
+            contentType(ContentType.Application.Json)
+        }
+    }
+
     suspend fun rejectFriendRequest(friendId: String) {
         client.post("$BASE_URL/friendships/request/$friendId/reject") {
             contentType(ContentType.Application.Json)

@@ -8,6 +8,7 @@ import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
 import com.example.vibechat.data.model.repository.ChatRepo
+import com.example.vibechat.data.model.repository.FriendRepository
 import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.chatscreen.components.DisconnectStatus
 import com.example.vibechat.ui.screens.chatscreen.components.Message
@@ -25,6 +26,7 @@ import kotlinx.serialization.json.Json
 
 class ChatScreenViewModel(
     private val chatRepository: ChatRepo,
+    private val friendRepository: FriendRepository,
     private val socketRepository: SocketRepository,
     private val savedStateHandle: SavedStateHandle,
     private val dataStore: DataStore<Preferences>
@@ -127,10 +129,10 @@ class ChatScreenViewModel(
         }
     }
 
-    fun sendFriendRequest(userId: String, friendId: String, action: String = "send") {
+    fun sendFriendRequest(friendId: String) {
         viewModelScope.launch {
             try {
-                chatRepository.sendFriendRequest(userId, friendId, action)
+                friendRepository.sendFriendRequest( friendId)
             } catch (e: Exception) {
 
             }
