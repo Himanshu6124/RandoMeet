@@ -23,25 +23,25 @@ fun RandomAppNavGraph(){
         startDestination = Screen.Splash.route,
     ){
         composable(route = Screen.Splash.route) {
-            FriendsScreenUI(
-                onBackPress = {},
-                onTabChange = {},
-                onFriendClick = {
-                    val json = Json.encodeToString(it)
-                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                        MATCHED_CONVERSATION, json
-                    )
-                    navController.navigate(Screen.ChatDetail.route)
-                }
-            )
-//            OnboardingScreen(
-//                goToMatchScreen = { userId->
-//                    navController.navigate(Screen.RandomMatch.route)
-//                },
-//                gotoSignUpScreen = {
-//                    navController.navigate(Screen.SignUp.route)
+//            FriendsScreenUI(
+//                onBackPress = {},
+//                onTabChange = {},
+//                onFriendClick = {
+//                    val json = Json.encodeToString(it)
+//                    navController.currentBackStackEntry?.savedStateHandle?.set(
+//                        MATCHED_CONVERSATION, json
+//                    )
+//                    navController.navigate(Screen.ChatDetail.route)
 //                }
 //            )
+            OnboardingScreen(
+                goToMatchScreen = { userId->
+                    navController.navigate(Screen.RandomMatch.route)
+                },
+                gotoSignUpScreen = {
+                    navController.navigate(Screen.SignUp.route)
+                }
+            )
         }
 
         composable(route = Screen.SignUp.route) {

@@ -123,7 +123,7 @@ fun FriendsScreenUI(
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         ){
-            itemsIndexed(sampleConversations){index,friend->
+            itemsIndexed(uiState.friends){index,friend->
                 FriendItem(
                     friend = friend,
                     onFriendClick = onFriendClick
@@ -140,7 +140,7 @@ fun FriendsScreenUI(
         // Friend Request Dialog
         if (uiState.showRequestDialog) {
             FriendRequestDialog(
-                friendRequests = sampleRequests,
+                friendRequests = uiState.friendRequests,
                 isLoading = uiState.isLoading,
                 onDismiss = { viewModel.handleEvent(FriendsEvent.OnDismissDialog) },
                 onAccept = { username -> viewModel.handleEvent(FriendsEvent.OnAcceptRequest(username)) },
