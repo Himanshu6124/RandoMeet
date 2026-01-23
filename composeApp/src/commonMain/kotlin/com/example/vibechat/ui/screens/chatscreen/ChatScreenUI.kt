@@ -20,15 +20,13 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,7 +59,6 @@ import com.example.vibechat.ui.commoncomposables.TextComposable
 import com.example.vibechat.ui.commoncomposables.whiteColor
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
-import com.example.vibechat.ui.screens.chatscreen.components.dummyMessages
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -215,47 +212,66 @@ fun SendMessageButton(
     onSendMessage: (Message) -> Unit = {},
 ) {
     Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF1C1C1E))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TextField(
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Black,
-                unfocusedContainerColor = Color.Black,
-                focusedPlaceholderColor = Color.White,
-                unfocusedPlaceholderColor = Color.White,
-                focusedTrailingIconColor = Color.White,
-                unfocusedTrailingIconColor = Color.White,
+                focusedContainerColor = Color(0xFF2C2C2E),
+                unfocusedContainerColor = Color(0xFF2C2C2E),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedPlaceholderColor = Color.Gray,
+                unfocusedPlaceholderColor = Color.Gray,
+                cursorColor = Color(0xFF007AFF),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             ),
-
-            modifier = Modifier.fillMaxWidth()
-                .border(1.dp, color = Color.Gray),
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(24.dp)),
             value = inputText,
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = null,
-                    modifier = Modifier.clickable {
-
-                        if (inputText == "") return@clickable
-
-                        val newMessage = Message(
-                            message = inputText,
-                            status = MessageStatus.SENT,
-                            timeStamp = String.EMPTY,
-                            senderId = userId,
-                            conversationId = conversationId
-                        )
-                        onSendMessage(newMessage)
-                    }
-                )
-            },
             placeholder = {
-                TextComposable(
-                    text = "Type your message here ...",
-                    fontWeight = FontWeight.Normal,
+                Text(
+                    text = "Type a message...",
+                    color = Color.Gray,
+                    fontSize = 15.sp
                 )
             },
             onValueChange = onTextUpdate
         )
+        
+        // Send Button
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = if (inputText.isNotEmpty()) Color(0xFF007AFF) else Color(0xFF3A3A3C),
+                    shape = CircleShape
+                )
+                .clickable(enabled = inputText.isNotEmpty()) {
+                    val newMessage = Message(
+                        message = inputText,
+                        status = MessageStatus.SENT,
+                        timeStamp = String.EMPTY,
+                        senderId = userId,
+                        conversationId = conversationId
+                    )
+                    onSendMessage(newMessage)
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Send,
+                contentDescription = "Send",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -276,7 +292,6 @@ fun ChatScreenTopBar(
             .padding(bottom = 10.dp)
             .fillMaxWidth()
             .greyGradient()
-            .padding(8.dp)
         ,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -287,21 +302,28 @@ fun ChatScreenTopBar(
 
         Row(
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .greyGradient()
+                .padding(10.dp)
+
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(30.dp)
                     .clickable(onClick = onBackPress),
                 contentDescription = "Back",
                 tint = whiteColor
             )
+            HorizontalSpacer(15.dp)
 
             AsyncImage(
                 model = chat.photoUrl,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(40.dp)
             )
 
             HorizontalSpacer(15.dp)
@@ -323,7 +345,7 @@ fun ChatScreenTopBar(
             Spacer(Modifier.weight(1f))
 
             Icon(
-                imageVector = Icons.Outlined.Delete,
+                imageVector = Icons.Outlined.AddCircle,
                 modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = onAddFriend),
@@ -366,6 +388,7 @@ fun TopSection(
 
     Row(
         modifier = Modifier
+            .padding(vertical = 6.dp)
             .background(
                 color = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(50)

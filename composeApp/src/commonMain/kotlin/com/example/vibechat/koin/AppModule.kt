@@ -1,5 +1,8 @@
 package com.example.vibechat.koin
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.example.vibechat.data.model.network.AuthPlugin
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.FriendRepository
 import com.example.vibechat.data.model.repository.UserRepositoryImpl
@@ -37,9 +40,13 @@ val viewmodelModule = module {
 }
 val provideHttpClientModule = module {
     single {
+        val dataStore = get<DataStore<Preferences>>()
         HttpClient {
             install(ContentNegotiation) {
                 json(json = Json { ignoreUnknownKeys = true }, contentType = ContentType.Any)
+            }
+            install(AuthPlugin) {
+                this.dataStore = dataStore
             }
         }
     }

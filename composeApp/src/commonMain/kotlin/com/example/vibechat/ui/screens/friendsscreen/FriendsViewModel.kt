@@ -14,11 +14,96 @@ class FriendsViewModel(
         get() = FriendsUIState()
 
     override fun handleEvent(event: FriendsEvent) {
+        when (event) {
+            is FriendsEvent.OnFabClick -> {
+                loadFriendRequests()
+                _uiState.update { it.copy(showRequestDialog = true) }
+            }
+            is FriendsEvent.OnDismissDialog -> {
+                _uiState.update { it.copy(showRequestDialog = false) }
+            }
+            is FriendsEvent.OnAcceptRequest -> {
+                acceptFriendRequest(event.friendUsername)
+            }
+            is FriendsEvent.OnRejectRequest -> {
+                rejectFriendRequest(event.friendUsername)
+            }
+            is FriendsEvent.OnLoadFriendRequests -> {
+                loadFriendRequests()
+            }
+        }
+    }
 
+    private fun loadFriendRequests() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            
+            try {
+                val requests = friendsRepository.getPendingFriendRequests()
+                _uiState.update { state ->
+                    state.copy(
+                        friendRequests = requests,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        error = e
+                    )
+                }
+                viewModelScope.launch {
+                    _effect.emit(FriendsSideEffect.ShowToast("Failed to load friend requests"))
+                }
+            }
+        }
+    }
+
+    private fun acceptFriendRequest(friendUsername: String) {
+        viewModelScope.launch {
+            try {
+                friendsRepository.acceptFriendRequest(friendUsername)
+                _uiState.update { state ->
+                    state.copy(
+                        friendRequests = state.friendRequests.filter { it.username != friendUsername }
+                    )
+                }
+                viewModelScope.launch {
+                    _effect.emit(FriendsSideEffect.ShowToast("Friend request accepted"))
+                }
+                // Reload friends list
+                getFriends()
+            } catch (e: Exception) {
+                viewModelScope.launch {
+                    _effect.emit(FriendsSideEffect.ShowToast("Failed to accept request"))
+                }
+            }
+        }
+    }
+
+    private fun rejectFriendRequest(friendUsername: String) {
+        viewModelScope.launch {
+            try {
+                friendsRepository.rejectFriendRequest(friendUsername)
+                _uiState.update { state ->
+                    state.copy(
+                        friendRequests = state.friendRequests.filter { it.username != friendUsername }
+                    )
+                }
+                viewModelScope.launch {
+                    _effect.emit(FriendsSideEffect.ShowToast("Friend request rejected"))
+                }
+            } catch (e: Exception) {
+                viewModelScope.launch {
+                    _effect.emit(FriendsSideEffect.ShowToast("Failed to reject request"))
+                }
+            }
+        }
     }
 
 
-    fun getFriends(userId: String) {
+    fun getFriends() {
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
@@ -27,7 +112,7 @@ class FriendsViewModel(
             }
 
             try {
-                val res = friendsRepository.getFriendConversations(userId)
+                val res = friendsRepository.getFriendConversations()
                 _uiState.update { state ->
                     state.copy(
                         friends = res ?: arrayListOf(),

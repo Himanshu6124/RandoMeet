@@ -16,15 +16,22 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,11 +48,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.vibechat.data.model.User
 import com.example.vibechat.ui.commoncomposables.TextComposable
 import com.example.vibechat.ui.commoncomposables.whiteColor
 import com.example.vibechat.ui.screens.chatscreen.TopSection
 import com.example.vibechat.ui.screens.chatscreen.greyGradient
 import com.example.vibechat.ui.screens.matchscreen.Conversation
+import com.example.vibechat.utils.sampleConversations
+import com.example.vibechat.utils.sampleRequests
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -62,10 +73,22 @@ fun FriendsScreenUI(
 ){
     val viewModel : FriendsViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsState().value
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Handle side effects
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is FriendsSideEffect.ShowToast -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color.Black,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             var selectedTab by remember { mutableStateOf("Friends") }
             Column(
@@ -83,34 +106,47 @@ fun FriendsScreenUI(
                     onSelect = onTabChange
                 )
             }
-
-//            TopAppBar(
-//                colors = Top,
-//                title = { Text("Friends") },
-//                actions = {
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                        modifier = Modifier
-//                            .size(40.dp)
-//                            .clickable(onClick = onBackPress),
-//                        contentDescription = "Back",
-//                        tint = whiteColor
-//                    )
-//                }
-//            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { viewModel.handleEvent(FriendsEvent.OnFabClick) },
+                containerColor = Color(0xFF007AFF),
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Friend Requests"
+                )
+            }
         }
     ) {paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         ){
-            items(uiState.friends){friend->
+            itemsIndexed(sampleConversations){index,friend->
                 FriendItem(
                     friend = friend,
                     onFriendClick = onFriendClick
                 )
+                if(index != sampleConversations.lastIndex){
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = Color.DarkGray
+                    )
+                }
             }
         }
 
+        // Friend Request Dialog
+        if (uiState.showRequestDialog) {
+            FriendRequestDialog(
+                friendRequests = sampleRequests,
+                isLoading = uiState.isLoading,
+                onDismiss = { viewModel.handleEvent(FriendsEvent.OnDismissDialog) },
+                onAccept = { username -> viewModel.handleEvent(FriendsEvent.OnAcceptRequest(username)) },
+                onReject = { username -> viewModel.handleEvent(FriendsEvent.OnRejectRequest(username)) }
+            )
+        }
     }
 
 }
@@ -126,7 +162,10 @@ fun FriendItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(
+                horizontal = 16.dp,
+                vertical = 12.dp
+            )
             .clickable{onFriendClick(friend)}
         ,
         verticalAlignment = Alignment.CenterVertically
@@ -137,7 +176,7 @@ fun FriendItem(
             model = friend.photoUrl,
             contentDescription = "friend_image",
             modifier = Modifier
-                .size(44.dp)
+                .size(50.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop
         )
@@ -149,8 +188,9 @@ fun FriendItem(
             modifier = Modifier.weight(1f)
         ) {
             Text(
+                color = Color.Gray,
                 text = friend.friendUserName,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -160,7 +200,7 @@ fun FriendItem(
 
             Text(
                 text = friend.lastMessage.orEmpty(),
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -177,19 +217,5 @@ fun FriendItem(
             color = Color.Gray
         )
     }
-}
 
-
-@Preview
-@Composable
-fun PrevFriend(){
-
-    FriendItem(
-        Conversation(
-        friendUserName = "abhishek",
-        lastMessage = "how are you ?",
-        lastMessageTime = "12:34",
-    ),
-        onFriendClick = {}
-    )
 }
