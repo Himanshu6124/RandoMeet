@@ -141,7 +141,9 @@ fun ChatScreen(
                     isOnline = uiState.isOnline,
                     onBackPress = navigateBack,
                     onAddFriend = {
-                        viewModel.sendFriendRequest(friendId = chat.friendUserId)
+                        viewModel.sendFriendRequest(
+                            friendId = chat.friendUserId
+                        )
                     },
                     onTabChange = onTabChange
                 )
