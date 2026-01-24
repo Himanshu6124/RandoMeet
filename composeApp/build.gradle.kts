@@ -74,7 +74,12 @@ kotlin {
             implementation("org.jetbrains.compose.material:material-icons-core:1.7.3")
 
 //            implementation("androidx.compose.material:material-icons-extended:1.7.3")
+            // peekaboo-ui
+            implementation(libs.peekaboo.ui)
 
+            // peekaboo-image-picker
+            implementation(libs.peekaboo.image.picker)
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
 
             //datastore

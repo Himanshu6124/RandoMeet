@@ -43,6 +43,6 @@ class FriendRepository(
     }
 
     suspend fun getFriendConversations(): List<Conversation>? =
-        client.get("$BASE_URL/friendships/conversations").body()
+        client.get("$BASE_URL/conversations/my-conversations").body()
 
 }

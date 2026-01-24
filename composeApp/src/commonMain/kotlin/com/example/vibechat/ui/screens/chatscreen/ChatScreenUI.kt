@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,12 +63,20 @@ import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.MessageCard
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
+import kotlinx.datetime.Clock
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import vibechat.composeapp.generated.resources.Res
+import vibechat.composeapp.generated.resources.add_friend
+import vibechat.composeapp.generated.resources.attach_file
+import vibechat.composeapp.generated.resources.rematch
+import vibechat.composeapp.generated.resources.report
 
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
+    selectedTab: String,
     isRandomMatch: Boolean = true,
     chat: Conversation? = Conversation(),
     navigateBack: () -> Unit = {},
@@ -115,6 +124,10 @@ fun ChatScreen(
                     }
                 }
 
+                is ChatSideEffect.ScrollToPosition -> {
+                    listState.scrollToItem(it.index)
+                }
+
                 is ChatSideEffect.ShowSnackBar -> {
 
                 }
@@ -131,12 +144,28 @@ fun ChatScreen(
         }
     }
 
+//    // Detect when user scrolls near the top to load next (older) page
+//    LaunchedEffect(listState.firstVisibleItemIndex, uiState.isLoadingMore, uiState.isEndReached) {
+//        val threshold = 2
+//        if (listState.firstVisibleItemIndex <= threshold && !uiState.isLoadingMore && !uiState.isEndReached) {
+//            viewModel.loadNextPage()
+//        }
+//    }
+
+    LaunchedEffect(Unit){
+        snapshotFlow {
+            listState.firstVisibleItemIndex
+        }.collect {
+            println("Fi")
+        }
+    }
 
     Scaffold(
         containerColor = Color.Black,
         topBar = {
             if (chat != null) {
                 ChatScreenTopBar(
+                    selectedTab = selectedTab,
                     chat = chat,
                     isOnline = uiState.isOnline,
                     onBackPress = navigateBack,
@@ -154,7 +183,8 @@ fun ChatScreen(
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (uiState.isTyping) {
                     Text(
-                        "typing...",
+                        color = Color.White,
+                        text = "typing...",
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 5.dp
@@ -185,6 +215,8 @@ fun ChatScreen(
                     onSkipClick = {
                         viewModel.disconnectSocketPermanently()
                         navigateToMatchScreen()
+                    },
+                    onAttachmentClick = {
                     }
                 )
             }
@@ -214,7 +246,8 @@ fun SendMessageButton(
     inputText: String = "",
     onTextUpdate: (String) -> Unit = {},
     onSendMessage: (Message) -> Unit = {},
-    onSkipClick: () -> Unit
+    onSkipClick: () -> Unit,
+    onAttachmentClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -226,10 +259,13 @@ fun SendMessageButton(
     ) {
 
         if(isRandomMatch){
-            Text(
-                text = "Skip",
-                color = Color.White,
-                modifier = Modifier.clickable{ onSkipClick() }
+            Icon(
+                painter = painterResource(Res.drawable.rematch),
+                contentDescription = "rematch",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable{onSkipClick()}
             )
         }
         TextField(
@@ -255,7 +291,17 @@ fun SendMessageButton(
                     fontSize = 15.sp
                 )
             },
-            onValueChange = onTextUpdate
+            onValueChange = onTextUpdate,
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(Res.drawable.attach_file),
+                    contentDescription = "attach file",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .clickable{onAttachmentClick()}
+                )
+
+            }
         )
         
         // Send Button
@@ -270,7 +316,7 @@ fun SendMessageButton(
                     val newMessage = Message(
                         message = inputText,
                         status = MessageStatus.SENT,
-                        timeStamp = String.EMPTY,
+                        timeStamp = Clock.System.now().toString(),
                         senderId = userId,
                         conversationId = conversationId
                     )
@@ -291,14 +337,13 @@ fun SendMessageButton(
 
 @Composable
 fun ChatScreenTopBar(
+    selectedTab: String,
     chat: Conversation,
     isOnline: Boolean,
     onBackPress: () -> Unit,
     onAddFriend: () -> Unit,
     onTabChange: (String) -> Unit
 ) {
-
-    var selectedTab by remember { mutableStateOf("Match") }
     Column(
         modifier = Modifier
             .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
@@ -358,8 +403,19 @@ fun ChatScreenTopBar(
             Spacer(Modifier.weight(1f))
 
             Icon(
-                imageVector = Icons.Outlined.AddCircle,
+                painter = painterResource(Res.drawable.report),
                 modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .size(30.dp)
+                    .clickable(onClick = onAddFriend),
+                contentDescription = "report",
+                tint = whiteColor
+            )
+
+            Icon(
+                painter = painterResource(Res.drawable.add_friend),
+                modifier = Modifier
+                    .padding(end = 10.dp)
                     .size(30.dp)
                     .clickable(onClick = onAddFriend),
                 contentDescription = "Add Friend",
@@ -367,17 +423,6 @@ fun ChatScreenTopBar(
             )
         }
     }
-}
-@Composable
-fun prevChatTopBar(){
-    ChatScreenTopBar(
-        chat = Conversation(friendUserName = "Hp"),
-        isOnline = true,
-        onAddFriend = {},
-        onBackPress = {},
-        onTabChange = {}
-
-    )
 }
 
 fun Modifier.greyGradient(): Modifier {
@@ -401,13 +446,13 @@ fun TopSection(
 
     Row(
         modifier = Modifier
-            .padding(vertical = 6.dp)
+            .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(50)
             )
+            .padding(16.dp)
         ,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         items.forEach { item ->
@@ -427,7 +472,7 @@ fun TopItem(
 ) {
     val backgroundColor by animateColorAsState(
         if (selected)
-            MaterialTheme.colorScheme.onSurfaceVariant
+            Color(0xFF007AFF)
         else
             Color.Transparent,
         label = ""
@@ -469,4 +514,3 @@ fun TopSectionPreview() {
         }
     )
 }
-

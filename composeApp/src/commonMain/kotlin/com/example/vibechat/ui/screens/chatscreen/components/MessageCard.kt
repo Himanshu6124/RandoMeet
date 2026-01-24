@@ -19,6 +19,8 @@ import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.ui.commoncomposables.whiteColor
 import com.example.vibechat.ui.screens.chatscreen.greyGradient
 import com.example.vibechat.ui.screens.matchscreen.MessageStatus
+import com.example.vibechat.utils.getBubbleTime
+import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview
@@ -55,7 +57,7 @@ fun MessageCard(
             Text(
                 color = whiteColor,
                 modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
-                text = "12:43 pm",
+                text = getBubbleTime(message.timeStamp),
                 fontSize = 10.sp
             )
             if(message.senderId == userId ){
@@ -126,7 +128,12 @@ val dummyMessages = listOf(
     )
 )
 
+@Serializable
+data class MessageResponse(
+    val content: List<Message> = emptyList()
+)
 
+@Serializable
 data class Message(
     val id : String? = null,
     val senderId: String?= null,
@@ -134,7 +141,12 @@ data class Message(
     var status: MessageStatus? = null,
     val conversationId: String,
     val timeStamp: String,
+    val messageType: MessageType = MessageType.TEXT
 )
+enum class MessageType{
+    TEXT,
+    IMAGE,
+}
 
 data class OnlineStatus(
     val senderId: String?= null,

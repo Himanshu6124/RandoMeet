@@ -64,6 +64,7 @@ class ChatScreenViewModel(
             }
             connectToSocket()
             sendOnlineStatus()
+            loadPage(0)
         }
     }
 
@@ -110,23 +111,71 @@ class ChatScreenViewModel(
         }
     }
 
-    fun getMessages(conversationId: String) {
+    fun loadPage(page: Int) {
+        val conversationId = _uiState.value.conversation.conversationId
+        if (_uiState.value.isEndReached && page > _uiState.value.currentPage) return
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            try {
-                val messages = chatRepository.getMessages(conversationId)
+            if (page == 0) {
                 _uiState.update {
-                    it.copy(messages = messages, isLoading = false)
+                    it.copy(
+                        isLoading = true,
+                        exception = null
+                    )
                 }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        isLoadingMore = true,
+                        exception = null
+                    )
+                }
+            }
+
+            try {
+                val size = _uiState.value.pageSize
+                val fetched = chatRepository.getMessages(conversationId, page, size).content
+
+                val existingIds = _uiState.value.messages.mapNotNull { it.id }.toSet()
+                val newMessages = fetched.filter { it.id == null || !existingIds.contains(it.id) }
+
+                if (page == 0) {
+                    _uiState.update {
+                        it.copy(
+                            messages = newMessages,
+                            isLoading = false,
+                            currentPage = 0,
+                            isEndReached = newMessages.size < size
+                        )
+                    }
+                } else {
+                    val endReached = newMessages.size < size || newMessages.isEmpty()
+                    _uiState.update {
+                        val totalMessages = it.messages.toMutableList() + newMessages
+                        it.copy(
+                            messages = totalMessages,
+                            isLoadingMore = false,
+                            currentPage = page,
+                            isEndReached = endReached
+                        )
+                    }
+                }
+                _effect.emit(ChatSideEffect.ScrollToBottom(newMessages.lastIndex))
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         exception = e,
-                        isLoading = false
+                        isLoading = false,
+                        isLoadingMore = false
                     )
                 }
             }
         }
+    }
+    fun loadNextPage() {
+        val next = _uiState.value.currentPage + 1
+        if (_uiState.value.isEndReached) return
+        loadPage(next)
     }
 
     fun sendFriendRequest(friendId: String) {
@@ -155,7 +204,7 @@ class ChatScreenViewModel(
                 return@launch
             }
             socketRepository.connect(userId = userId)
-            socketRepository.subscribe(topic = "/topic/room/$friendUserId-$conversationId")
+            socketRepository.subscribe(topic = "/topic/room/$friendUserId/$conversationId")
         }
     }
 

@@ -13,7 +13,13 @@ data class ChatUIState(
     val userId : String? = String.EMPTY,
     val isTyping : Boolean = false,
     val exception: Exception?  = null,
-    val conversation: Conversation = Conversation()
+    val conversation: Conversation = Conversation(),
+
+    // Pagination fields
+    val currentPage: Int = 0,
+    val pageSize: Int = 20,
+    val isLoadingMore: Boolean = false,
+    val isEndReached: Boolean = false
 )
 
 sealed interface ChatEvent {
@@ -25,7 +31,7 @@ sealed interface ChatEvent {
 sealed interface ChatSideEffect {
     data class ShowSnackBar(val message: String) : ChatSideEffect
     data class ScrollToBottom(val index: Int) : ChatSideEffect
+    data class ScrollToPosition(val index: Int) : ChatSideEffect
     data class ShowToast(val message: String) : ChatSideEffect
     data class NavigateToMatchScreen(val disconnectedUserName: String?) : ChatSideEffect
 }
-

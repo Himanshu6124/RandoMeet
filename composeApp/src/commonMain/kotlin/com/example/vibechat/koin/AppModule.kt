@@ -43,7 +43,13 @@ val provideHttpClientModule = module {
         val dataStore = get<DataStore<Preferences>>()
         HttpClient {
             install(ContentNegotiation) {
-                json(json = Json { ignoreUnknownKeys = true }, contentType = ContentType.Any)
+                json(
+                    json = Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                    },
+                    contentType = ContentType.Any)
+
             }
             install(AuthPlugin) {
                 this.dataStore = dataStore

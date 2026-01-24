@@ -1,9 +1,16 @@
 package com.example.vibechat.ui.screens.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.ui.screens.chatscreen.ChatScreen
 import com.example.vibechat.ui.screens.friendsscreen.FriendsScreenUI
@@ -18,28 +25,34 @@ import kotlinx.serialization.json.Json
 fun RandomAppNavGraph(){
 
     val navController = rememberNavController()
+    var selectedTab by remember { mutableStateOf("Match") }
+
+    LaunchedEffect(selectedTab){
+        when(selectedTab){
+            "Match" -> navController.navigate(Screen.RandomMatch.route)
+            "Friends" -> navController.navigate(Screen.FriendsScreen.route)
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
     ){
         composable(route = Screen.Splash.route) {
-//            FriendsScreenUI(
-//                onBackPress = {},
-//                onTabChange = {},
-//                onFriendClick = {
-//                    val json = Json.encodeToString(it)
-//                    navController.currentBackStackEntry?.savedStateHandle?.set(
-//                        MATCHED_CONVERSATION, json
-//                    )
-//                    navController.navigate(Screen.ChatDetail.route)
-//                }
-//            )
             OnboardingScreen(
-                goToMatchScreen = { userId->
-                    navController.navigate(Screen.RandomMatch.route)
+                goToMatchScreen = { userId ->
+                    navController.navigate(Screen.RandomMatch.route) {
+                        popUpTo(Screen.Splash.route) {
+                            inclusive = true
+                        }
+                    }
                 },
                 gotoSignUpScreen = {
-                    navController.navigate(Screen.SignUp.route)
+                    navController.navigate(Screen.SignUp.route) {
+                        popUpTo(Screen.Splash.route) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
@@ -68,47 +81,42 @@ fun RandomAppNavGraph(){
         }
         composable(route = Screen.RandomMatch.route) {
             HomeScreenV2(
+                selectedTab = selectedTab,
                 onMatchFound = {
                     val json = Json.encodeToString(it)
                     navController.currentBackStackEntry?.savedStateHandle?.set(
                         MATCHED_CONVERSATION, json
                     )
-                    navController.navigate(Screen.ChatDetail.route)
+                    navController.navigate(Screen.ChatDetail.createRoute(true))
+                },
+                onTabChange = {
+                    selectedTab = it
                 }
             )
-
-//            ChatScreen(
-//                isRandomMatch = true,
-//                chat = Conversation(friendUserName = "fs"),
-//                navigateBack = { navController.navigateUp() },
-//                navigateToMatchScreen = {
-//                    navController.navigate(Screen.RandomMatch.route)
-//                },
-//                onTabChange = {
-//                    if(it == "Friends"){
-//                        navController.navigate(Screen.FriendsScreen.route)
-//                    }else{
-//                        navController.navigateUp()
-//                    }
-//                }
-//            )
         }
 
-        composable(route = Screen.ChatDetail.route) {
+        composable(
+            route = Screen.ChatDetail.route,
+            arguments = listOf(
+                navArgument("is_random") {
+                    type = NavType.BoolType
+                }
+            )
+        ) { backStackEntry->
             val json = navController.previousBackStackEntry?.savedStateHandle?.get<String>(MATCHED_CONVERSATION)
+            val isRandom: Boolean = backStackEntry.savedStateHandle["is_random"] ?: false
             json?.let {
                 val chat = Json.decodeFromString<Conversation>(json)
                 ChatScreen(
-                    isRandomMatch = true,
+                    selectedTab = selectedTab,
+                    isRandomMatch = isRandom,
                     chat = chat,
                     navigateBack = { navController.navigateUp() },
                     navigateToMatchScreen = {
                         navController.navigate(Screen.RandomMatch.route)
                     },
                     onTabChange = {
-                        if(it == "Friends"){
-                            navController.navigate(Screen.FriendsScreen.route)
-                        }
+                        selectedTab = it
                     }
                 )
             }
@@ -118,6 +126,7 @@ fun RandomAppNavGraph(){
             route = Screen.FriendsScreen.route,
         ) {
             FriendsScreenUI(
+                selectedTab = selectedTab,
                 onFriendClick = {
                     val json = Json.encodeToString(it)
                     navController.currentBackStackEntry?.savedStateHandle?.set(
@@ -129,9 +138,7 @@ fun RandomAppNavGraph(){
                     navController.navigateUp()
                 },
                 onTabChange = {
-                    if(it == "Match"){
-                        navController.navigateUp()
-                    }
+                    selectedTab = it
                 }
             )
         }
