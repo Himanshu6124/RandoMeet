@@ -19,10 +19,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,24 +52,30 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vibechat.koin.showToast
+import com.example.vibechat.ui.commoncomposables.VerticalSpacer
+import com.example.vibechat.ui.screens.chatscreen.TopSection
 import com.example.vibechat.ui.screens.chatscreen.greyGradient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.min
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenV2(
+    selectedTab: String,
     modifier: Modifier = Modifier,
-    onMatchFound : (Conversation) -> Unit
+    onMatchFound: (Conversation) -> Unit,
+    onTabChange: (String) -> Unit
 ) {
     val viewModel = koinViewModel<RandomMatchViewModel>()
     val uiState = viewModel.uiState.collectAsState().value
+    var randomCount by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit){
-        viewModel.effect.collectLatest{ effect ->
-            when(effect){
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
                 is RandomMatchSideEffect.NavigateToChatScreen -> {
                     println("effect navigate to chat screen")
                     onMatchFound(effect.matchedConversation)
@@ -74,46 +84,44 @@ fun HomeScreenV2(
         }
     }
 
-    // Full-screen gradient background
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .greyGradient()
-            ,
-        contentAlignment = Alignment.Center
-    ) {
-        // Content column
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 36.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Top area: Online label and count
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 12.dp)
-            ) {
-                Text(
-                    text = "User Online : 1464",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.9f)
-                    )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            FrostedStartButton(
-                size = 240.dp,
-                isAnimating = uiState.isLoading,
-                onClick = {
-                    showToast("Starting Match...")
-                    viewModel.handleEvent(RandomMatchEvent.OnStartMatchClick)
-                }
-            )
+    LaunchedEffect(Unit) {
+        while (true) {
+            randomCount = Random.nextInt(1500, 3000)
+            delay(10000)
         }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+
+        TopSection(
+            selected = selectedTab,
+            onSelect = onTabChange
+        )
+        VerticalSpacer(12.dp)
+        Text(
+            text = "User Online $randomCount",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        FrostedStartButton(
+            size = 200.dp,
+            isAnimating = uiState.isLoading,
+            onClick = {
+                showToast("Starting Match...")
+                viewModel.handleEvent(RandomMatchEvent.OnStartMatchClick)
+            }
+        )
     }
 }
 
@@ -220,15 +228,11 @@ private fun FrostedStartButton(
 
     Box(
         modifier = Modifier
+            .padding(bottom = 40.dp)
             .size(size)
             .clip(CircleShape)
             .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.18f),
-                        Color(0xFFB388FF).copy(alpha = 0.10f)
-                    )
-                )
+                Color(0xFF007AFF)
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
