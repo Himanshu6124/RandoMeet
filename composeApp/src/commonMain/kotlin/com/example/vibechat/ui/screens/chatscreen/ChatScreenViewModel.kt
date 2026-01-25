@@ -7,12 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.vibechat.constants.CONSTANTS.MATCHED_CONVERSATION
 import com.example.vibechat.constants.CONSTANTS.USER_ID
 import com.example.vibechat.core.BaseViewModel
+import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.data.model.repository.ChatRepo
 import com.example.vibechat.data.model.repository.FriendRepository
 import com.example.vibechat.socket.SocketRepository
 import com.example.vibechat.ui.screens.chatscreen.components.DisconnectStatus
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
+import com.example.vibechat.ui.screens.chatscreen.components.SeenStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import kotlinx.coroutines.Job
@@ -43,6 +45,7 @@ class ChatScreenViewModel(
         observeTypingStatus()
         observeOnlineStatus()
         observeDisconnectedStatus()
+        observeSeenStatus()
     }
 
     override fun handleEvent(event: ChatEvent) {
@@ -53,6 +56,7 @@ class ChatScreenViewModel(
 
             ChatEvent.DisconnectSocket -> disconnectSocket()
             is ChatEvent.InitState -> iniState(event.conversation)
+            is ChatEvent.OnInputTextChange -> updateMessage(inputText = event.inputText)
         }
     }
 
@@ -65,6 +69,13 @@ class ChatScreenViewModel(
             connectToSocket()
             sendOnlineStatus()
             loadPage(0)
+        }
+    }
+    fun updateMessage(inputText: String) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(inputText = inputText)
+            }
         }
     }
 
@@ -91,9 +102,13 @@ class ChatScreenViewModel(
     private fun observeIncomingMessages() {
         viewModelScope.launch {
             socketRepository.messages
-                .filterNotNull()   // VERY IMPORTANT
+                .filterNotNull()
                 .collect { newMessage ->
                     addMessage(newMessage)
+                    sendSeenStatus(
+                        messageId = newMessage.id ,
+                        conversationId = newMessage.conversationId
+                    )
                 }
 
         }
@@ -103,7 +118,7 @@ class ChatScreenViewModel(
         viewModelScope.launch {
             _uiState.update {
                 val messages = it.messages.toMutableList().apply {
-                    add(message)
+                    add(0,message)
                 }
                 it.copy(messages = messages)
             }
@@ -113,6 +128,7 @@ class ChatScreenViewModel(
 
     fun loadPage(page: Int) {
         val conversationId = _uiState.value.conversation.conversationId
+        val lastMessageId = _uiState.value.conversation.friendLastSeenMessageId
         if (_uiState.value.isEndReached && page > _uiState.value.currentPage) return
 
         viewModelScope.launch {
@@ -161,6 +177,7 @@ class ChatScreenViewModel(
                     }
                 }
                 _effect.emit(ChatSideEffect.ScrollToBottom(newMessages.lastIndex))
+                markMessageAsSeen(lastMessageId)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -215,9 +232,12 @@ class ChatScreenViewModel(
             socketRepository.sendMessage(destination, message)
             _uiState.update {
                 val messages = it.messages.toMutableList().apply {
-                    add(message)
+                    add(0,message)
                 }
-                it.copy(messages = messages)
+                it.copy(
+                    messages = messages,
+                    inputText = String.EMPTY
+                )
             }
             _effect.emit(ChatSideEffect.ScrollToBottom(uiState.value.messages.lastIndex))
         }
@@ -235,20 +255,6 @@ class ChatScreenViewModel(
             socketRepository.sendMessage("/app/chat.online", onlineStatus)
         }
     }
-
-    fun getFriendStatus() {
-        viewModelScope.launch {
-            val conversationId = _uiState.value.conversation.conversationId
-            val friendId = _uiState.value.conversation.friendUserId
-            println("getting online status with frined: $friendId and conversationId: $conversationId")
-            if (conversationId == null)
-                return@launch
-
-            val onlineStatus = OnlineStatus(senderId = friendId, conversationId = conversationId)
-            socketRepository.sendMessage("/app/chat.user.status", onlineStatus)
-        }
-    }
-
     fun onUserTyping(senderId: String, conversationId: String, inputText: String) {
         if (inputText.isNotEmpty()) {
             if (!hasSentTypingStatus) {
@@ -289,6 +295,37 @@ class ChatScreenViewModel(
             }
         }
     }
+    fun observeSeenStatus(){
+        viewModelScope.launch {
+            socketRepository.seenStatus.collect { seenStatus ->
+                markMessageAsSeen(seenStatus.messageId)
+            }
+        }
+    }
+
+    fun markMessageAsSeen(messageId: String?) {
+        val allMessages = _uiState.value.messages.toMutableList()
+        val index = allMessages.indexOfFirst { it.id == messageId }
+
+        if (index != -1) {
+            allMessages[index] = allMessages[index].copy(isSeen = true)
+        }
+
+        _uiState.update {
+            it.copy(messages = allMessages)
+        }
+    }
+
+    fun sendSeenStatus(messageId: String? ,conversationId : String){
+        val seenStatus  = SeenStatus(
+            messageId = messageId,
+            conversationId = conversationId
+        )
+        val isRandom = savedStateHandle.get<Boolean>("is_random") ?: false
+        val destination = if(isRandom) "/app/chat.random.seen" else "/app/chat.seen"
+        socketRepository.sendMessage(destination, seenStatus)
+    }
+
 
     fun disconnectSocketPermanently() {
         val disconnectedStatus = DisconnectStatus(

@@ -1,6 +1,7 @@
 package com.example.vibechat.ui.screens.friendsscreen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.vibechat.ui.commoncomposables.TextComposable
+import com.example.vibechat.ui.commoncomposables.whiteColor
 import com.example.vibechat.ui.screens.chatscreen.TopSection
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.example.vibechat.utils.getBubbleTime
@@ -101,19 +104,30 @@ fun FriendsScreenUI(
             }
         }
     ) {paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-        ){
-            itemsIndexed(uiState.friends){index,friend->
-                FriendItem(
-                    friend = friend,
-                    onFriendClick = onFriendClick
-                )
-                if(index != uiState.friends.lastIndex){
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color.DarkGray
+
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = whiteColor)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+            ) {
+                itemsIndexed(uiState.friends) { index, friend ->
+                    FriendItem(
+                        friend = friend,
+                        onFriendClick = onFriendClick
                     )
+                    if (index != uiState.friends.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = Color.DarkGray
+                        )
+                    }
                 }
             }
         }

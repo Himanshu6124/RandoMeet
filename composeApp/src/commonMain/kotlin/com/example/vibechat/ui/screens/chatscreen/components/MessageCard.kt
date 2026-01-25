@@ -64,12 +64,7 @@ fun MessageCard(
                 Text(
                     color = whiteColor,
                     modifier = Modifier.align(Alignment.End).padding(end = 10.dp),
-                    text = when(message.status){
-                        MessageStatus.SENT -> "sent"
-                        MessageStatus.DELIVERED -> "delivered"
-                        MessageStatus.READ -> "read"
-                        null -> "unknown"
-                    },
+                    text = if(message.isSeen) "seen" else "",
                     fontSize = 10.sp
                 )
             }
@@ -141,7 +136,8 @@ data class Message(
     var status: MessageStatus? = null,
     val conversationId: String,
     val timeStamp: String,
-    val messageType: MessageType = MessageType.TEXT
+    val messageType: MessageType = MessageType.TEXT,
+    val isSeen: Boolean = false
 )
 enum class MessageType{
     TEXT,
@@ -163,4 +159,9 @@ data class TypingStatus(
 data class DisconnectStatus(
     val senderId: String?= null,
     val conversationId: String = String.EMPTY ,
+)
+data class SeenStatus(
+    val seenAt: String?= null,
+    val conversationId: String?= null,
+    val messageId: String? = null ,
 )

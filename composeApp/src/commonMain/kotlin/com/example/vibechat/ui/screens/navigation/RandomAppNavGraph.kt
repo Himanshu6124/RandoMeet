@@ -27,13 +27,6 @@ fun RandomAppNavGraph(){
     val navController = rememberNavController()
     var selectedTab by remember { mutableStateOf("Match") }
 
-    LaunchedEffect(selectedTab){
-        when(selectedTab){
-            "Match" -> navController.navigate(Screen.RandomMatch.route)
-            "Friends" -> navController.navigate(Screen.FriendsScreen.route)
-        }
-    }
-
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
@@ -91,7 +84,16 @@ fun RandomAppNavGraph(){
                 },
                 onTabChange = {
                     selectedTab = it
+                    when (it) {
+                        "Match" -> navController.navigate(Screen.RandomMatch.route) {
+                            launchSingleTop = true
+                        }
+                        "Friends" -> navController.navigate(Screen.FriendsScreen.route) {
+                            launchSingleTop = true
+                        }
+                    }
                 }
+
             )
         }
 
@@ -117,7 +119,16 @@ fun RandomAppNavGraph(){
                     },
                     onTabChange = {
                         selectedTab = it
+                        when (it) {
+                            "Match" -> navController.navigate(Screen.RandomMatch.route) {
+                                launchSingleTop = true
+                            }
+                            "Friends" -> navController.navigate(Screen.FriendsScreen.route) {
+                                launchSingleTop = true
+                            }
+                        }
                     }
+
                 )
             }
         }
@@ -139,6 +150,14 @@ fun RandomAppNavGraph(){
                 },
                 onTabChange = {
                     selectedTab = it
+                    when (it) {
+                        "Match" -> navController.navigate(Screen.RandomMatch.route) {
+                            launchSingleTop = true
+                        }
+                        "Friends" -> navController.navigate(Screen.FriendsScreen.route) {
+                            launchSingleTop = true
+                        }
+                    }
                 }
             )
         }

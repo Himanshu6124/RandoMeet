@@ -22,11 +22,13 @@ data class Conversation(
     val isByYou: Boolean? = false,
     val messageStatus: MessageStatus? = MessageStatus.SENT,
     val lastMessageTime: String? = String.EMPTY,
-    val messageType: String? = String.EMPTY
+    val messageType: String? = String.EMPTY,
+    val friendLastSeenMessageId: String? = null,
+    val friendLastSeenAt: String? = null
 )
 
 enum class MessageStatus(val status: String) {
-    SENT("SENT"), DELIVERED("DELIVERED"), READ("READ")
+    SENT("SENT"), DELIVERED("DELIVERED"), READ("READ"),SEEN("SEEN")
 }
 
 sealed interface RandomMatchEvent {

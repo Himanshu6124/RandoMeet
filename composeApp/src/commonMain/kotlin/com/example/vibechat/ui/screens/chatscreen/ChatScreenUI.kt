@@ -26,8 +26,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -71,7 +76,10 @@ import vibechat.composeapp.generated.resources.Res
 import vibechat.composeapp.generated.resources.add_friend
 import vibechat.composeapp.generated.resources.attach_file
 import vibechat.composeapp.generated.resources.rematch
+import vibechat.composeapp.generated.resources.remove_friend
 import vibechat.composeapp.generated.resources.report
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 fun ChatScreen(
@@ -85,7 +93,6 @@ fun ChatScreen(
 ) {
     val viewModel: ChatScreenViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsState().value
-    var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -120,7 +127,7 @@ fun ChatScreen(
             when (it) {
                 is ChatSideEffect.ScrollToBottom -> {
                     if (it.index != -1) {
-                        listState.animateScrollToItem(it.index)
+                        listState.animateScrollToItem(0)
                     }
                 }
 
@@ -165,6 +172,7 @@ fun ChatScreen(
         topBar = {
             if (chat != null) {
                 ChatScreenTopBar(
+                    isRandom = isRandomMatch,
                     selectedTab = selectedTab,
                     chat = chat,
                     isOnline = uiState.isOnline,
@@ -195,9 +203,9 @@ fun ChatScreen(
                     isRandomMatch = isRandomMatch,
                     userId = uiState.userId.orEmpty(),
                     conversationId = chat?.conversationId ?: "",
-                    inputText = inputText,
+                    inputText = uiState.inputText,
                     onTextUpdate = {
-                        inputText = it
+                        viewModel.handleEvent(ChatEvent.OnInputTextChange(it))
                         viewModel.onUserTyping(
                             senderId = uiState.userId.orEmpty(),
                             conversationId = chat?.conversationId.orEmpty(),
@@ -224,20 +232,32 @@ fun ChatScreen(
 
     ) { padding ->
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            state = listState
-        ) {
-            items(uiState.messages) { message ->
-                MessageCard(uiState.userId, message) {
+
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = whiteColor)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                state = listState,
+                reverseLayout = true
+            ) {
+                items(uiState.messages) { message ->
+                    MessageCard(uiState.userId, message) {
 //                        deleteMessage(it)
+                    }
                 }
             }
-
         }
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun SendMessageButton(
     isRandomMatch: Boolean,
@@ -314,6 +334,7 @@ fun SendMessageButton(
                 )
                 .clickable(enabled = inputText.isNotEmpty()) {
                     val newMessage = Message(
+                        id = Uuid.random().toString(),
                         message = inputText,
                         status = MessageStatus.SENT,
                         timeStamp = Clock.System.now().toString(),
@@ -337,6 +358,7 @@ fun SendMessageButton(
 
 @Composable
 fun ChatScreenTopBar(
+    isRandom: Boolean,
     selectedTab: String,
     chat: Conversation,
     isOnline: Boolean,
@@ -344,6 +366,7 @@ fun ChatScreenTopBar(
     onAddFriend: () -> Unit,
     onTabChange: (String) -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
@@ -402,25 +425,59 @@ fun ChatScreenTopBar(
 
             Spacer(Modifier.weight(1f))
 
-            Icon(
-                painter = painterResource(Res.drawable.report),
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .size(30.dp)
-                    .clickable(onClick = onAddFriend),
-                contentDescription = "report",
-                tint = whiteColor
-            )
+            if(isRandom){
+                Icon(
+                    painter = painterResource(Res.drawable.add_friend),
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(30.dp)
+                        .clickable(onClick = onAddFriend),
+                    contentDescription = "Add Friend",
+                    tint = whiteColor
+                )
+            }else{
+                Icon(
+                    painter = painterResource(Res.drawable.remove_friend),
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(30.dp)
+                        .clickable(onClick = onAddFriend),
+                    contentDescription = "remove Friend",
+                    tint = whiteColor
+                )
+            }
+            Box{
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = null,
+                        tint = whiteColor
+                    )
+                }
 
-            Icon(
-                painter = painterResource(Res.drawable.add_friend),
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .size(30.dp)
-                    .clickable(onClick = onAddFriend),
-                contentDescription = "Add Friend",
-                tint = whiteColor
-            )
+                DropdownMenu(
+                    expanded = expanded,
+                    containerColor = Color.Black,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(
+                            text = "Block user",
+                            color = Color.White
+                        ) },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(Res.drawable.report),
+                                modifier = Modifier
+                                    .clickable{},
+                                contentDescription = "menu",
+                                tint = whiteColor
+                            )
+                        },
+                        onClick = { expanded = false }
+                    )
+                }
+            }
         }
     }
 }

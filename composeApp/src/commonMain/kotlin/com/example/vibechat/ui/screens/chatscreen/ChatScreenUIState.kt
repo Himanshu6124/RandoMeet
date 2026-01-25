@@ -14,6 +14,7 @@ data class ChatUIState(
     val isTyping : Boolean = false,
     val exception: Exception?  = null,
     val conversation: Conversation = Conversation(),
+    val inputText: String = String.EMPTY,
 
     // Pagination fields
     val currentPage: Int = 0,
@@ -26,6 +27,7 @@ sealed interface ChatEvent {
     data class SendMessage(val message: Message , val isForRandomMatching : Boolean ) : ChatEvent
     data object DisconnectSocket : ChatEvent
     data class InitState(val conversation: Conversation?) : ChatEvent
+    data class OnInputTextChange(val inputText: String) : ChatEvent
 }
 
 sealed interface ChatSideEffect {

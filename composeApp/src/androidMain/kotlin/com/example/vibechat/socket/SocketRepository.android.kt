@@ -9,6 +9,7 @@ import com.example.vibechat.core.utils.EMPTY
 import com.example.vibechat.ui.screens.chatscreen.components.DisconnectStatus
 import com.example.vibechat.ui.screens.chatscreen.components.Message
 import com.example.vibechat.ui.screens.chatscreen.components.OnlineStatus
+import com.example.vibechat.ui.screens.chatscreen.components.SeenStatus
 import com.example.vibechat.ui.screens.chatscreen.components.TypingStatus
 import com.example.vibechat.ui.screens.matchscreen.Conversation
 import com.google.gson.Gson
@@ -42,6 +43,9 @@ actual class SocketRepository actual constructor(
 
     private val _chatCardData = MutableStateFlow(Conversation())
     actual val matchedConversation: StateFlow<Conversation> = _chatCardData
+
+    private val _seenStatus = MutableStateFlow(SeenStatus())
+    actual val seenStatus: StateFlow<SeenStatus> = _seenStatus
 
 
     @SuppressLint("CheckResult")
@@ -92,12 +96,16 @@ actual class SocketRepository actual constructor(
                         _isTyping.tryEmit(parsedEvent.typing.typing)
 
                     }
-                    null -> {
-                        Log.w("STOMP", "Unknown event type ${jsonObject}")
-                    }
-
                     is SocketEvent.DisconnectEvent -> {
                         _disconnectedUserName.tryEmit(parsedEvent.status.senderId)
+                    }
+
+                    is SocketEvent.MessageSeenEvent -> {
+                        _seenStatus.tryEmit(parsedEvent.status)
+                    }
+
+                    null -> {
+                        Log.w("STOMP", "Unknown event type ${jsonObject}")
                     }
                 }
             } catch (e: Exception) {
@@ -135,10 +143,13 @@ actual class SocketRepository actual constructor(
                     gson.fromJson(payload, DisconnectStatus::class.java)
                 )
 
-            else -> {
-                SocketEvent.ChatCardEvent(
-                    gson.fromJson(payload, Conversation::class.java)
+            "SEEN" ->{
+                SocketEvent.MessageSeenEvent(
+                    gson.fromJson(payload, SeenStatus::class.java)
                 )
+            }
+            else -> {
+                null
             }
         }
     }
@@ -167,6 +178,7 @@ sealed interface SocketEvent {
     data class OnlineEvent(val online: OnlineStatus) : SocketEvent
     data class ChatCardEvent(val chat: Conversation) : SocketEvent
     data class DisconnectEvent(val status: DisconnectStatus) : SocketEvent
+    data class MessageSeenEvent(val status: SeenStatus) : SocketEvent
 }
 
 
