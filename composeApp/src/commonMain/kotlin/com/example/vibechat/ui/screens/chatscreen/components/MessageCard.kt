@@ -136,7 +136,7 @@ data class Message(
     var status: MessageStatus? = null,
     val conversationId: String,
     val timeStamp: String,
-    val messageType: MessageType = MessageType.TEXT,
+    val messageType: MessageType? = MessageType.TEXT,
     val isSeen: Boolean = false
 )
 enum class MessageType{
